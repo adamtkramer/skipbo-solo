@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#12141c" />
+<title>Skip-Bo Solo — you vs. the computer</title>
+<meta name="description" content="Play genuine Skip-Bo solo against a computer opponent. Pure client-side, no account, no server — plays forever." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%2312141c'/%3E%3Ctext x='50' y='66' font-size='46' text-anchor='middle' fill='%23E2572B' font-family='Georgia,serif' font-weight='bold'%3ESB%3C/text%3E%3C/svg%3E" />
+<style>
+:root{
+  --bg-deep:#0c0e14;
+  --bg-mid:#12141c;
+  --panel:rgba(255,255,255,.045);
+  --panel-strong:rgba(255,255,255,.08);
+  --hairline:rgba(255,255,255,.09);
+  --ink:#F2EFE7;
+  --muted:rgba(242,239,231,.6);
+  --faint:rgba(242,239,231,.4);
+  --accent:#E2572B;
+  --accent-ink:#1a0c07;
+  --blue:#3F8FC4;
+  --gold:#D8A93E;
+  --good:#4CAF7D;
+  --bad:#D9584F;
+  --card-cream:#F6F1E3;
+  --card-cream-dk:#E7DFC9;
+  --radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:radial-gradient(120% 100% at 50% -10%, var(--bg-mid) 0%, var(--bg-deep) 60%);color:var(--ink);}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;overscroll-behavior-y:contain;padding-bottom:24px;}
+button{font:inherit;cursor:pointer;color:inherit;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:rgba(242,239,231,.18);border-radius:3px;}
+
+#app{max-width:640px;margin:0 auto;padding:12px 10px 32px;display:flex;flex-direction:column;gap:10px;}
+
+/* ---------- header ---------- */
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:4px 2px 6px;}
+.hdr .brand .eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);}
+.hdr .brand h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(24px,7vw,32px);font-weight:800;margin:2px 0 0;letter-spacing:-.01em;}
+.hdr .brand h1 .sb{color:var(--accent);}
+.hdr-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+.btn{background:transparent;border:1px solid var(--hairline);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:12px;letter-spacing:.03em;white-space:nowrap;}
+.btn:hover{border-color:rgba(242,239,231,.35);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;}
+.btn.undo{background:var(--gold);border-color:var(--gold);color:#241a05;font-weight:800;box-shadow:0 3px 12px rgba(216,169,62,.35);}
+.btn.undo:disabled{background:transparent;color:var(--faint);border-color:var(--hairline);box-shadow:none;}
+.btn.small{padding:5px 10px;font-size:11px;}
+
+/* ---------- turn / status bar ---------- */
+.statusbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--hairline);flex-wrap:wrap;}
+.turnpill{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:rgba(242,239,231,.08);color:var(--muted);}
+.turnpill.mine{background:var(--accent);color:#fff;}
+.turnpill.bot{background:var(--blue);color:#fff;}
+.turnpill.win{background:var(--good);color:#06210f;}
+.turnpill.lose{background:var(--bad);color:#2a0705;}
+.turnpill.draw{background:var(--gold);color:#241a05;}
+.census{font-size:10.5px;color:var(--faint);display:flex;align-items:center;gap:6px;}
+.census .dot{width:6px;height:6px;border-radius:99px;background:var(--good);flex-shrink:0;}
+.census.bad .dot{background:var(--bad);}
+.census.bad{color:var(--bad);}
+
+/* ---------- zones ---------- */
+.zone{display:flex;flex-direction:column;gap:6px;}
+.zone-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;justify-content:space-between;}
+.zone-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding:10px;border-radius:var(--radius);background:var(--panel);border:1px solid var(--hairline);}
+.zone-row.you{background:rgba(226,87,43,.06);border-color:rgba(226,87,43,.18);}
+.zone-row.bot{background:rgba(63,143,196,.06);border-color:rgba(63,143,196,.18);}
+
+.stack-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.stack-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.stack-body{position:relative;}
+.count-badge{position:absolute;right:-6px;bottom:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:rgba(12,14,20,.92);border:1px solid var(--hairline);color:var(--ink);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.count-badge.big{background:var(--accent);color:#fff;border-color:var(--accent);min-width:23px;height:23px;font-size:12px;}
+
+.discard-row{display:flex;gap:5px;}
+
+.handwrap{display:flex;gap:6px;flex-wrap:wrap;padding:10px 8px;border-radius:var(--radius);background:var(--panel);border:1px solid var(--hairline);min-height:78px;align-items:center;justify-content:center;}
+.hand-empty-note{font-size:12px;color:var(--faint);padding:6px;}
+.bot-hand-mini{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);margin-left:auto;}
+.bot-hand-mini .mini-back{width:15px;height:21px;border-radius:3px;background:repeating-linear-gradient(45deg,#274b58,#274b58 3px,#1b3945 3px,#1b3945 6px);border:1px solid rgba(63,143,196,.4);}
+
+/* ---------- cards ---------- */
+.card{
+  width:clamp(40px,10.5vw,54px);
+  height:clamp(56px,14.7vw,76px);
+  border-radius:8px;
+  background:linear-gradient(160deg,var(--card-cream) 0%, var(--card-cream) 55%, var(--card-cream-dk) 100%);
+  border:1px solid rgba(12,14,20,.35);
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  color:#1a1a1a;
+  position:relative;
+  flex-shrink:0;
+}
+.card .rank{font-family:Georgia,serif;font-weight:800;font-size:clamp(18px,5vw,26px);color:var(--card-color,#1a1a1a);}
+.card.wild{background:linear-gradient(150deg,#3a2a55 0%, #241b3b 55%, #171128 100%);border-color:rgba(216,169,62,.55);box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 0 0 2px rgba(216,169,62,.18);}
+.card.wild .wildLogo{font-family:Georgia,serif;font-weight:800;font-size:clamp(9px,2.6vw,12px);line-height:1.15;text-align:center;color:var(--gold);letter-spacing:.02em;}
+.card.wild .wildAs{font-family:Georgia,serif;font-weight:800;font-size:clamp(16px,4.6vw,23px);color:var(--gold);}
+.card.wild .wildAs::after{content:"*";font-size:.55em;vertical-align:top;margin-left:1px;}
+.card.back{background:repeating-linear-gradient(45deg,#22334a,#22334a 4px,#182838 4px,#182838 8px);border:1px solid rgba(63,143,196,.4);box-shadow:inset 0 0 0 3px rgba(63,143,196,.14),0 2px 6px rgba(0,0,0,.4);}
+.card.empty{background:transparent;border:1px dashed rgba(242,239,231,.2);box-shadow:none;}
+.card.slot{background:transparent;border:1px dashed rgba(242,239,231,.28);box-shadow:none;color:var(--faint);font-family:Georgia,serif;font-size:20px;}
+
+.cardbtn{background:none;border:none;padding:0;border-radius:9px;position:relative;}
+.cardbtn.playable .card{box-shadow:0 0 0 2px rgba(76,175,125,.55),0 2px 6px rgba(0,0,0,.4);}
+.cardbtn.selected .card{outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-4px);}
+.cardbtn.legal-target .card,.pile-slot.legal-target .card,.pile-slot.legal-target .slot{animation:pulse 1.4s ease-in-out infinite;}
+.cardbtn:disabled{cursor:default;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(216,169,62,.6);}50%{box-shadow:0 0 0 8px rgba(216,169,62,0);}}
+@media (prefers-reduced-motion:reduce){.cardbtn.legal-target .card,.pile-slot.legal-target .card,.pile-slot.legal-target .slot{animation:none;outline:2px dashed var(--gold);}}
+
+/* discard fan (small stacked look, top card only truly interactive) */
+.fan{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.fan .fan-label{font-size:9px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase;}
+.fan .fan-count{margin-left:3px;opacity:.7;}
+
+/* ---------- center ---------- */
+.center{display:flex;gap:10px;align-items:center;padding:12px 10px;border-radius:var(--radius);background:rgba(255,255,255,.03);border:1px solid var(--hairline);flex-wrap:wrap;justify-content:center;}
+.center-side{display:flex;gap:8px;}
+.build-row{display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:center;align-items:flex-end;}
+.pile-slot{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.pile-meta{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);}
+.pile-slot button{background:none;border:none;padding:0;}
+
+/* ---------- hint / log / tabs ---------- */
+.hint{font-size:12px;color:var(--muted);min-height:16px;text-align:center;padding:0 6px;}
+.panel{border-radius:var(--radius);background:var(--panel);border:1px solid var(--hairline);overflow:hidden;}
+.tabs{display:flex;border-bottom:1px solid var(--hairline);}
+.tab{flex:1;background:transparent;border:none;padding:10px 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.tab.on{background:var(--panel-strong);color:var(--ink);}
+.logbox{max-height:190px;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
+.logline{font-size:12.5px;color:var(--muted);}
+.logline.you{color:var(--ink);}
+.logline.stock{color:var(--gold);}
+.logline.sys{color:var(--faint);font-style:italic;}
+.logline.win{color:var(--good);font-weight:700;}
+
+.score{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.score-cell{padding:12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--hairline);text-align:center;}
+.score-cell.lead{background:rgba(226,87,43,.12);border-color:rgba(226,87,43,.4);}
+.score-cell .nm{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.score-cell .wl{font-family:Georgia,serif;font-size:26px;font-weight:800;margin-top:2px;}
+.score-cell .sub{font-size:11px;color:var(--faint);margin-top:3px;}
+.score-note{font-size:11.5px;color:var(--faint);line-height:1.5;text-align:center;}
+.score-hist{display:flex;flex-direction:column;gap:4px;font-size:12px;max-height:150px;overflow-y:auto;}
+.hist-line{display:flex;justify-content:space-between;gap:8px;padding:4px 2px;border-bottom:1px solid var(--hairline);}
+.hist-line .who.you{color:var(--accent);font-weight:700;}
+.hist-line .who.bot{color:var(--blue);font-weight:700;}
+.hist-line .who.draw{color:var(--gold);font-weight:700;}
+.streakline{display:flex;justify-content:center;gap:18px;font-size:11.5px;color:var(--muted);}
+.streakline b{color:var(--ink);}
+
+/* ---------- rules / info ---------- */
+details.rules{border-radius:var(--radius);background:var(--panel);border:1px solid var(--hairline);padding:2px 4px;}
+details.rules summary{cursor:pointer;padding:9px 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);list-style:none;}
+details.rules summary::-webkit-details-marker{display:none;}
+details.rules .body{padding:2px 12px 14px;font-size:12.5px;color:var(--muted);line-height:1.6;}
+details.rules .body b{color:var(--ink);}
+
+/* ---------- overlay / winner ---------- */
+.overlay{position:fixed;inset:0;background:rgba(6,7,10,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}
+.overlay-card{background:var(--bg-mid);border:1px solid var(--hairline);border-radius:18px;padding:28px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.overlay-card h2{font-family:Georgia,serif;font-size:28px;margin:0 0 8px;}
+.overlay-card h2.win{color:var(--good);}
+.overlay-card h2.lose{color:var(--bad);}
+.overlay-card h2.draw{color:var(--gold);}
+.overlay-card p{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 18px;}
+.overlay-card .btnrow{display:flex;gap:8px;justify-content:center;}
+
+.footer-note{text-align:center;font-size:10.5px;color:var(--faint);padding:10px 4px 0;line-height:1.6;}
+.footer-note a{color:var(--muted);}
+
+@media (max-width:380px){
+  .score-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   SKIP-BO SOLO — genuine Skip-Bo rules, single file, no network.
+   162-card deck (144 number cards 1-12 x12, 18 Skip-Bo wilds).
+   30-card stock pile each, 5-card hand, 4 personal discard piles.
+   Unlimited shared center build piles, 1 through 12, wilds are
+   universal. Computer opponent is a deterministic, rule-based JS
+   engine (scoring + shallow rollout simulation) — no network
+   calls of any kind are made to decide its moves.
+   ============================================================ */
+
+/* ---------- persistent local storage (this browser only, no backend) ---------- */
+window.storage = window.storage || (function(){
+  var KEY = "skipbo-solo:v1";
+  function read(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } }
+  function write(obj){ try{ localStorage.setItem(KEY, JSON.stringify(obj)); } catch(e){} }
+  return {
+    get: function(key, fallback){ var d = read(); return (key in d) ? d[key] : fallback; },
+    set: function(key, value){ var d = read(); d[key] = value; write(d); },
+    all: read
+  };
+})();
+
+/* ---------- randomness (true, via crypto where available) ---------- */
+function randInt(n){
+  if (typeof crypto !== "undefined" && crypto.getRandomValues){
+    var limit = Math.floor(0xffffffff / n) * n, a = new Uint32Array(1), v;
+    do { crypto.getRandomValues(a); v = a[0]; } while (v >= limit);
+    return v % n;
+  }
+  return Math.floor(Math.random() * n);
+}
+function shuffle(arr){
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--){ var j = randInt(i + 1); var t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+
+/* ---------- deck ---------- */
+var STOCK_SIZE = 30, HAND_SIZE = 5, PILE_TOP = 12;
+var PALETTE = ["#C0392B","#2E6F9E","#2E9E5B","#B7871E","#7B4FA0","#1E8E86"];
+function buildDeck(){
+  var cards = [], id = 0;
+  for (var r = 1; r <= 12; r++){ for (var c = 0; c < 12; c++){ cards.push({ id: "n" + (id++), rank: r }); } }
+  for (var w = 0; w < 18; w++){ cards.push({ id: "w" + (id++), rank: 0 }); }
+  return cards;
+}
+var FULL_DECK_SIZE = 162;
+var top = function(pile){ return pile && pile.length ? pile[pile.length - 1] : null; };
+var pileValue = function(pile){ return pile.base + pile.cards.length; };
+var canPlaceOnPile = function(card, pile){ return !!card && pileValue(pile) < PILE_TOP && (card.rank === 0 || card.rank === pileValue(pile) + 1); };
+var canStartNewPile = function(card){ return !!card && (card.rank === 0 || card.rank === 1); };
+function otherOf(who){ return who === "human" ? "bot" : "human"; }
+function label(card){ return card.rank === 0 ? "a Skip-Bo" : ("a " + card.rank); }
+
+/* ---------- game setup ---------- */
+function freshPlayer(){ return { stock: [], hand: [], discards: [[], [], [], []] }; }
+function newGame(starter){
+  var deck = shuffle(buildDeck());
+  var players = { human: freshPlayer(), bot: freshPlayer() };
+  for (var i = 0; i < STOCK_SIZE; i++){ players.human.stock.push(deck.pop()); players.bot.stock.push(deck.pop()); }
+  for (var j = 0; j < HAND_SIZE; j++){ players.human.hand.push(deck.pop()); players.bot.hand.push(deck.pop()); }
+  return {
+    draw: deck,
+    used: [],
+    build: [],
+    players: players,
+    turn: starter,
+    winner: null,
+    pileSeq: 0,
+    log: [{ kind: "deal" }],
+    turnHistory: [],
+    gridlockStrikes: 0
+  };
+}
+
+/* ---------- card access helpers (shared by real + simulated play) ---------- */
+function peekSourceCard(g, who, src){
+  var p = g.players[who];
+  if (src.type === "stock") return p.stock.length ? p.stock[p.stock.length - 1] : null;
+  if (src.type === "hand") return p.hand[src.idx] || null;
+  if (src.type === "discard") { var d = p.discards[src.idx]; return d.length ? d[d.length - 1] : null; }
+  return null;
+}
+function takeSourceCard(g, who, src){
+  var p = g.players[who];
+  if (src.type === "stock") return p.stock.pop();
+  if (src.type === "hand") return p.hand.splice(src.idx, 1)[0];
+  if (src.type === "discard") return p.discards[src.idx].pop();
+  return null;
+}
+
+/* ---------- drawing / reshuffle / last-resort strip ---------- */
+function drawOne(g, silent){
+  if (!g.draw.length){
+    if (g.used.length){
+      g.draw = shuffle(g.used); g.used = [];
+      if (!silent) g.log.push({ kind: "reshuffle", n: g.draw.length });
+    } else {
+      var pool = [];
+      g.build.forEach(function(pile){
+        if (pile.cards.length > 1){
+          var under = pile.cards.splice(0, pile.cards.length - 1);
+          pile.base += under.length;
+          pool.push.apply(pool, under);
+        }
+      });
+      if (pool.length){
+        g.draw = shuffle(pool);
+        if (!silent) g.log.push({ kind: "strip", n: pool.length });
+      } else {
+        if (!silent) g.log.push({ kind: "gridlock" });
+        return null;
+      }
+    }
+  }
+  return g.draw.pop();
+}
+function refillHand(g, who, target, silent){
+  var p = g.players[who], drew = 0;
+  while (p.hand.length < target){
+    var c = drawOne(g, silent);
+    if (!c) break;
+    p.hand.push(c); drew++;
+  }
+  return drew;
+}
+
+/* ---------- applying a play / discard (used for both real moves and AI simulation) ---------- */
+function applyPlay(g, who, src, pileIdx, opts){
+  opts = opts || {};
+  var card = takeSourceCard(g, who, src);
+  if (!card) return false;
+  var pile;
+  if (pileIdx === "new"){
+    pile = { id: "p" + (++g.pileSeq), base: 0, cards: [] };
+    g.build.push(pile);
+  } else {
+    pile = g.build[pileIdx];
+  }
+  pile.cards.push(card);
+  var standsFor = pileValue(pile);
+  var completed = false;
+  if (pileValue(pile) === PILE_TOP){
+    g.used.push.apply(g.used, pile.cards);
+    g.build.splice(g.build.indexOf(pile), 1);
+    completed = true;
+  }
+  if (!opts.silent){
+    g.log.push({ kind: "play", who: who, rank: card.rank, standsFor: standsFor, from: src.type, completed: completed, opened: pileIdx === "new" });
+  }
+  if (src.type === "stock" && g.players[who].stock.length === 0 && !g.winner){
+    g.winner = who;
+    if (!opts.silent) g.log.push({ kind: "win", who: who });
+  }
+  if (!g.winner && src.type === "hand" && g.players[who].hand.length === 0){
+    var drew = refillHand(g, who, HAND_SIZE, opts.silent);
+    if (drew > 0 && !opts.silent) g.log.push({ kind: "hand-refill", who: who, n: drew });
+  }
+  return true;
+}
+function applyDiscard(g, who, handIdx, pileIdx, opts){
+  opts = opts || {};
+  var p = g.players[who];
+  var card = p.hand.splice(handIdx, 1)[0];
+  p.discards[pileIdx].push(card);
+  if (!opts.silent) g.log.push({ kind: "discard", who: who, rank: card.rank, pileIdx: pileIdx });
+  return true;
+}
+
+/* ---------- legal move enumeration ---------- */
+function addMovesForCard(g, card, src, moves){
+  if (!card) return;
+  g.build.forEach(function(pile, i){ if (canPlaceOnPile(card, pile)) moves.push({ src: src, pileIdx: i }); });
+  if (canStartNewPile(card)) moves.push({ src: src, pileIdx: "new" });
+}
+function legalPlaysFor(g, who){
+  var p = g.players[who], moves = [];
+  addMovesForCard(g, p.stock.length ? p.stock[p.stock.length - 1] : null, { type: "stock" }, moves);
+  p.hand.forEach(function(c, i){ addMovesForCard(g, c, { type: "hand", idx: i }, moves); });
+  p.discards.forEach(function(pile, i){ addMovesForCard(g, pile.length ? pile[pile.length - 1] : null, { type: "discard", idx: i }, moves); });
+  return moves;
+}
+function hasAnyLegalPlay(g, who){ return legalPlaysFor(g, who).length > 0; }
+
+/* ---------- deep clone for undo + AI simulation ---------- */
+function cloneG(g){
+  var rest = {};
+  for (var k in g) if (k !== "turnHistory") rest[k] = g[k];
+  return JSON.parse(JSON.stringify(rest));
+}
+
+/* ============================================================
+   COMPUTER OPPONENT — fully local, deterministic, rule-based.
+   For every candidate move we compute a heuristic score, then
+   run a short greedy rollout on a cloned state to see how many
+   additional stock cards that choice would let us chain-empty.
+   No network/API calls happen anywhere in this file.
+   ============================================================ */
+function shallowBestMove(g, who, moves){
+  var best = null, bestScore = -Infinity;
+  for (var i = 0; i < moves.length; i++){
+    var m = moves[i], c = peekSourceCard(g, who, m.src), s = 0;
+    if (m.src.type === "stock") s += 100;
+    if (c.rank === 0) s -= 10;
+    var pv = m.pileIdx === "new" ? 0 : pileValue(g.build[m.pileIdx]);
+    if (pv + 1 === PILE_TOP) s += 50;
+    if (s > bestScore){ bestScore = s; best = m; }
+  }
+  return best;
+}
+function rollout(gClone, who, steps){
+  var count = 0;
+  for (var i = 0; i < steps; i++){
+    var moves = legalPlaysFor(gClone, who);
+    if (!moves.length) break;
+    var best = shallowBestMove(gClone, who, moves);
+    var wasStock = best.src.type === "stock";
+    applyPlay(gClone, who, best.src, best.pileIdx, { silent: true });
+    if (wasStock) count++;
+    if (gClone.winner) break;
+  }
+  return count;
+}
+function scoreMove(g, who, move){
+  var card = peekSourceCard(g, who, move.src);
+  var score = 0;
+  if (move.src.type === "stock") score += 1000;      // always top priority: progress toward emptying stock
+  if (move.src.type === "discard") score += 15;        // slight bonus for unloading a discard pile
+  if (card.rank === 0) score -= 25;                     // save wilds when a natural card would do
+  if (move.pileIdx === "new") score -= 8;               // mild preference for extending piles over fragmenting
+  var clone = cloneG(g);
+  var usedBefore = g.used.length;
+  applyPlay(clone, who, move.src, move.pileIdx, { silent: true });
+  if (clone.used.length > usedBefore) score += 400;     // completing a pile clears clutter, big value
+  if (move.src.type === "hand" && clone.players[who].hand.length === 0) score += 20;
+  score += rollout(clone, who, 5) * 60;                 // lookahead: reward chains that keep emptying the stock
+  return score;
+}
+function pickBestMove(g, who){
+  var moves = legalPlaysFor(g, who);
+  if (!moves.length) return null;
+  var best = null, bestScore = -Infinity;
+  for (var i = 0; i < moves.length; i++){
+    var s = scoreMove(g, who, moves[i]);
+    if (s > bestScore){ bestScore = s; best = moves[i]; }
+  }
+  return best;
+}
+function scoreDiscard(g, who, handIdx, pileIdx){
+  var p = g.players[who], card = p.hand[handIdx];
+  var score = 0;
+  if (card.rank === 0) score -= 200;                    // strongly avoid discarding wilds
+  var minDist = 99;
+  g.build.forEach(function(pile){
+    var need = pileValue(pile) + 1;
+    if (need <= PILE_TOP) minDist = Math.min(minDist, Math.abs(card.rank - need));
+  });
+  if (!g.build.length) minDist = Math.abs(card.rank - 1);
+  score += Math.min(minDist, 11) * 6;                   // farther from any pile's need = safer to bury
+  var pile = p.discards[pileIdx];
+  score -= pile.length * 2;                             // mild preference to spread across piles
+  var buriedTop = top(pile);
+  if (buriedTop){
+    var buriedUseful = 12;
+    g.build.forEach(function(bp){
+      var need = pileValue(bp) + 1;
+      if (need <= PILE_TOP) buriedUseful = Math.min(buriedUseful, Math.abs(buriedTop.rank - need));
+    });
+    score -= Math.max(0, 6 - buriedUseful) * 3;          // avoid burying a card that's close to useful
+  }
+  return score;
+}
+function pickBestDiscard(g, who){
+  var p = g.players[who];
+  if (!p.hand.length) return null;
+  var best = null, bestScore = -Infinity;
+  for (var hi = 0; hi < p.hand.length; hi++){
+    for (var pi = 0; pi < 4; pi++){
+      var s = scoreDiscard(g, who, hi, pi);
+      if (s > bestScore){ bestScore = s; best = { handIdx: hi, pileIdx: pi }; }
+    }
+  }
+  return best;
+}
+
+/* ---------- gridlock / stalemate safety valve ---------- */
+function checkGridlock(g){
+  if (g.winner) return;
+  if (!g.draw.length && !g.used.length && !hasAnyLegalPlay(g, "human") && !hasAnyLegalPlay(g, "bot")){
+    g.gridlockStrikes = (g.gridlockStrikes || 0) + 1;
+    if (g.gridlockStrikes >= 1){
+      g.winner = "draw";
+      g.log.push({ kind: "stalemate" });
+    }
+  }
+}
+
+/* ---------- census (integrity self-check) ---------- */
+function census(g){
+  var counts = {}, total = 0;
+  function add(arr){ arr.forEach(function(c){ total++; var k = c.rank === 0 ? "SB" : "n" + c.rank; counts[k] = (counts[k] || 0) + 1; }); }
+  add(g.draw); add(g.used);
+  g.build.forEach(function(p){ add(p.cards); });
+  ["human", "bot"].forEach(function(w){ add(g.players[w].stock); add(g.players[w].hand); g.players[w].discards.forEach(add); });
+  var ok = total === FULL_DECK_SIZE && (counts.SB || 0) <= 18;
+  var declaredWild = 0, physicalWild = counts.SB || 0;
+  // account for base-stripped cards still counted implicitly via draw/used pools; base cards are
+  // physically already in draw/used, so no separate tally needed beyond total count check.
+  var dupes = [];
+  for (var r = 1; r <= 12; r++){
+    var want = 12, have = counts["n" + r] || 0;
+    if (have !== want) { ok = false; dupes.push(r + "×" + have); }
+  }
+  if (physicalWild !== 18) ok = false;
+  return { ok: ok, total: total, dupes: dupes };
+}
+
+/* ============================================================
+   SCOREBOARD — persisted via window.storage, updates the instant
+   a game ends, no manual step required.
+   ============================================================ */
+function loadBoard(){
+  return window.storage.get("board", { games: 0, humanWins: 0, botWins: 0, draws: 0, streak: 0, streakWho: null, bestStreak: 0, history: [] });
+}
+function saveBoard(b){ window.storage.set("board", b); }
+function recordResult(g){
+  var board = loadBoard();
+  board.games += 1;
+  var entry = { at: Date.now(), winner: g.winner };
+  if (g.winner === "draw"){
+    board.draws += 1;
+    board.streak = 0; board.streakWho = null;
+  } else {
+    var loser = otherOf(g.winner);
+    var leftover = g.players[loser].stock.length;
+    entry.loserStockLeft = leftover;
+    if (g.winner === "human") board.humanWins += 1; else board.botWins += 1;
+    if (board.streakWho === g.winner) board.streak += 1; else { board.streak = 1; board.streakWho = g.winner; }
+    if (board.streak > board.bestStreak) board.bestStreak = board.streak;
+  }
+  board.history.unshift(entry);
+  board.history = board.history.slice(0, 40);
+  saveBoard(board);
+  return board;
+}
+
+/* ============================================================
+   UI STATE + RENDER
+   ============================================================ */
+var G = null;
+var board = loadBoard();
+var selected = null;          // { type, idx? }
+var activeTab = "log";
+var botTimer = null;
+
+function startTurn(who){
+  G.turn = who;
+  if (who === "human"){
+    G.turnHistory = [];
+    refillHand(G, "human", HAND_SIZE);
+    checkGridlock(G);
+  } else {
+    refillHand(G, "bot", HAND_SIZE);
+    checkGridlock(G);
+  }
+}
+function beginNewGame(){
+  var starter = (board.games % 2 === 0) ? "human" : "bot";
+  G = newGame(starter);
+  selected = null;
+  startTurn(starter);
+  render();
+  if (G.turn === "bot" && !G.winner) botTimer = setTimeout(botStep, 650);
+}
+
+/* ---------- undo (current turn only) ---------- */
+function snapshotForUndo(){
+  var rest = {};
+  for (var k in G) if (k !== "turnHistory") rest[k] = G[k];
+  return JSON.parse(JSON.stringify(rest));
+}
+function pushUndo(){
+  if (G.turn !== "human" || G.winner) return;
+  G.turnHistory.push(snapshotForUndo());
+  if (G.turnHistory.length > 60) G.turnHistory.shift();
+}
+function doUndo(){
+  if (G.turn !== "human" || G.winner || !G.turnHistory.length) return;
+  var hist = G.turnHistory;
+  var snap = hist.pop();
+  for (var k in G) if (k !== "turnHistory") delete G[k];
+  for (var k2 in snap) G[k2] = snap[k2];
+  G.turnHistory = hist;
+  selected = null;
+  render();
+}
+
+/* ---------- human interaction ---------- */
+function isMyTurnPlayable(){ return G && !G.winner && G.turn === "human"; }
+function selectSource(src){
+  if (!isMyTurnPlayable()) return;
+  var card = peekSourceCard(G, "human", src);
+  if (!card) return;
+  if (selected && selected.type === src.type && selected.idx === src.idx){ selected = null; }
+  else { selected = src; }
+  render();
+}
+function clickBuildPile(pileIdx){
+  if (!isMyTurnPlayable() || !selected) return;
+  var card = peekSourceCard(G, "human", selected);
+  var legal = pileIdx === "new" ? canStartNewPile(card) : canPlaceOnPile(card, G.build[pileIdx]);
+  if (!legal) return;
+  pushUndo();
+  applyPlay(G, "human", selected, pileIdx);
+  selected = null;
+  afterHumanAction();
+}
+function clickOwnDiscardPile(pileIdx){
+  if (!isMyTurnPlayable()) return;
+  if (selected && selected.type === "hand"){
+    pushUndo();
+    applyDiscard(G, "human", selected.idx, pileIdx);
+    selected = null;
+    afterHumanAction(true);
+    return;
+  }
+  selectSource({ type: "discard", idx: pileIdx });
+}
+function afterHumanAction(turnEnded){
+  render();
+  if (G.winner){ finishGame(); return; }
+  if (turnEnded){
+    startTurn("bot");
+    render();
+    botTimer = setTimeout(botStep, 700);
+  }
+}
+
+/* ---------- bot turn execution (paced, purely local) ---------- */
+var botPlaysThisTurn = 0;
+function botStep(){
+  if (G.winner) return;
+  var moves = legalPlaysFor(G, "bot");
+  if (moves.length && botPlaysThisTurn < 300){
+    var move = pickBestMove(G, "bot");
+    applyPlay(G, "bot", move.src, move.pileIdx);
+    botPlaysThisTurn++;
+    render();
+    if (G.winner){ finishGame(); return; }
+    botTimer = setTimeout(botStep, 480);
+  } else {
+    botTimer = setTimeout(botDiscardStep, 420);
+  }
+}
+function botDiscardStep(){
+  if (G.winner) return;
+  if (!G.players.bot.hand.length){
+    startTurn("human"); render(); return;
+  }
+  var choice = pickBestDiscard(G, "bot");
+  applyDiscard(G, "bot", choice.handIdx, choice.pileIdx);
+  botPlaysThisTurn = 0;
+  startTurn("human");
+  render();
+}
+
+/* ---------- finish / scoreboard hook ---------- */
+function finishGame(){
+  board = recordResult(G);
+  render();
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+var app = document.getElementById("app");
+
+function cardHTML(card, cls, standsFor){
+  cls = cls || "";
+  if (!card) return '<div class="card empty"></div>';
+  if (card.rank === 0){
+    return '<div class="card wild ' + cls + '">' +
+      (standsFor ? '<span class="wildAs">' + standsFor + '</span>' : '<span class="wildLogo">SKIP<br>BO</span>') +
+      '</div>';
+  }
+  var color = PALETTE[(card.rank - 1) % PALETTE.length];
+  return '<div class="card num ' + cls + '" style="--card-color:' + color + '"><span class="rank">' + card.rank + '</span></div>';
+}
+function backHTML(){ return '<div class="card back"></div>'; }
+
+function sourceIsPlayable(src){
+  var card = peekSourceCard(G, "human", src);
+  if (!card) return false;
+  if (canStartNewPile(card)) return true;
+  for (var i = 0; i < G.build.length; i++) if (canPlaceOnPile(card, G.build[i])) return true;
+  return false;
+}
+function legalTargetsFor(src){
+  var card = peekSourceCard(G, "human", src);
+  var out = { piles: [], newPile: false };
+  if (!card) return out;
+  G.build.forEach(function(p, i){ if (canPlaceOnPile(card, p)) out.piles.push(i); });
+  out.newPile = canStartNewPile(card);
+  return out;
+}
+
+function renderStatusBar(){
+  var pillClass = "turnpill", pillText;
+  if (G.winner === "human"){ pillClass += " win"; pillText = "You win!"; }
+  else if (G.winner === "bot"){ pillClass += " lose"; pillText = "Computer wins"; }
+  else if (G.winner === "draw"){ pillClass += " draw"; pillText = "Stalemate"; }
+  else if (G.turn === "human"){ pillClass += " mine"; pillText = "Your turn"; }
+  else { pillClass += " bot"; pillText = "Computer's turn…"; }
+  var cs = census(G);
+  return '' +
+  '<div class="statusbar">' +
+    '<span class="' + pillClass + '">' + pillText + '</span>' +
+    '<span class="census' + (cs.ok ? '' : ' bad') + '"><span class="dot"></span>' +
+      (cs.ok ? (cs.total + '/162 cards accounted for') : ('deck check: ' + cs.total + '/162' + (cs.dupes.length ? ' · ' + cs.dupes.join(' ') : ''))) +
+    '</span>' +
+  '</div>';
+}
+
+function renderBotZone(){
+  var b = G.players.bot;
+  var discs = b.discards.map(function(pile, i){
+    return '<div class="fan"><span class="fan-label">D' + (i + 1) + (pile.length ? '<span class="fan-count">' + pile.length + '</span>' : '') + '</span>' +
+      (pile.length ? cardHTML(top(pile)) : '<div class="card empty"></div>') + '</div>';
+  }).join("");
+  return '' +
+  '<div class="zone">' +
+    '<div class="zone-label"><span>Computer</span></div>' +
+    '<div class="zone-row bot">' +
+      '<div class="stack-wrap"><span class="stack-label">Stock</span><div class="stack-body">' +
+        (b.stock.length ? backHTML() : '<div class="card empty"></div>') +
+        '<span class="count-badge big">' + b.stock.length + '</span></div></div>' +
+      '<div class="discard-row">' + discs + '</div>' +
+      '<div class="bot-hand-mini"><span class="mini-back"></span><span>' + b.hand.length + ' in hand</span></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderCenter(){
+  var piles = G.build.map(function(pile, i){
+    var legal = selected && canPlaceOnPile(peekSourceCard(G, "human", selected), pile) && isMyTurnPlayable();
+    return '<div class="pile-slot' + (legal ? ' legal-target' : '') + '"><button data-target="pile:' + i + '">' +
+      cardHTML(top(pile.cards), "", pileValue(pile)) +
+      '</button><span class="pile-meta">next ' + (pileValue(pile) + 1 > 12 ? '—' : pileValue(pile) + 1) + '</span></div>';
+  }).join("");
+  var newLegal = selected && canStartNewPile(peekSourceCard(G, "human", selected)) && isMyTurnPlayable();
+  var newTile = '<div class="pile-slot' + (newLegal ? ' legal-target' : '') + '"><button data-target="pile:new">' +
+    '<div class="card slot">1</div></button><span class="pile-meta">new pile</span></div>';
+  return '' +
+  '<div class="center">' +
+    '<div class="center-side">' +
+      '<div class="stack-wrap"><span class="stack-label">Draw</span><div class="stack-body">' +
+        (G.draw.length ? backHTML() : '<div class="card empty"></div>') + '<span class="count-badge">' + G.draw.length + '</span></div></div>' +
+      '<div class="stack-wrap"><span class="stack-label">Reshuffle</span><div class="stack-body">' +
+        '<div class="card back" style="opacity:.4"></div><span class="count-badge">' + G.used.length + '</span></div></div>' +
+    '</div>' +
+    '<div class="build-row">' + piles + newTile + '</div>' +
+  '</div>';
+}
+
+function renderYouZone(){
+  var p = G.players.human;
+  var stockCard = top(p.stock);
+  var stockSel = selected && selected.type === "stock";
+  var stockPlayable = isMyTurnPlayable() && sourceIsPlayable({ type: "stock" });
+  var stockHTML = '<button class="cardbtn' + (stockSel ? ' selected' : '') + (stockPlayable ? ' playable' : '') + '" data-src="stock">' +
+      (stockCard ? cardHTML(stockCard) : '<div class="card empty"></div>') + '</button>';
+
+  var discs = p.discards.map(function(pile, i){
+    var sel = selected && selected.type === "discard" && selected.idx === i;
+    var playable = isMyTurnPlayable() && pile.length && sourceIsPlayable({ type: "discard", idx: i });
+    var isDiscardTarget = selected && selected.type === "hand" && isMyTurnPlayable();
+    var cls = "cardbtn" + (sel ? " selected" : "") + (playable ? " playable" : "") + (isDiscardTarget ? " legal-target" : "");
+    return '<div class="fan"><span class="fan-label">D' + (i + 1) + (pile.length ? '<span class="fan-count">' + pile.length + '</span>' : '') + '</span>' +
+      '<button class="' + cls + '" data-src="discard:' + i + '" data-target="discard:' + i + '">' +
+      (pile.length ? cardHTML(top(pile)) : '<div class="card empty"></div>') + '</button></div>';
+  }).join("");
+
+  var hand = p.hand.map(function(c, i){
+    var sel = selected && selected.type === "hand" && selected.idx === i;
+    var playable = isMyTurnPlayable() && sourceIsPlayable({ type: "hand", idx: i });
+    return '<button class="cardbtn' + (sel ? ' selected' : '') + (playable ? ' playable' : '') + '" data-src="hand:' + i + '">' + cardHTML(c) + '</button>';
+  }).join("");
+
+  return '' +
+  '<div class="zone">' +
+    '<div class="zone-label"><span>You</span><span>' + p.stock.length + ' left in stock</span></div>' +
+    '<div class="zone-row you">' +
+      '<div class="stack-wrap"><span class="stack-label">Your stock</span><div class="stack-body">' + stockHTML + '<span class="count-badge big">' + p.stock.length + '</span></div></div>' +
+      '<div class="discard-row">' + discs + '</div>' +
+    '</div>' +
+    '<div class="handwrap">' + (hand || '<div class="hand-empty-note">Hand empty.</div>') + '</div>' +
+  '</div>';
+}
+
+function hintText(){
+  if (G.winner === "human") return "You emptied your stock pile. Nice one.";
+  if (G.winner === "bot") return "The computer emptied its stock pile first.";
+  if (G.winner === "draw") return "No cards left to draw and neither side can move — called as a stalemate.";
+  if (G.turn !== "human") return "Computer is thinking…";
+  if (!selected) return "Tap your stock, a hand card, or one of your discard piles to pick it up.";
+  if (selected.type === "hand") return "Tap a lit build pile to play it, or one of your discard piles to end your turn.";
+  return "Tap a lit build pile to play it.";
+}
+
+function renderLogEntry(entry){
+  var who = function(w){ return w === "human" ? "You" : "The computer"; };
+  switch (entry.kind){
+    case "deal": return { cls: "sys", text: "New game dealt — 30-card stock and 5-card hand each. 162 cards in play." };
+    case "play": {
+      var name = who(entry.who);
+      var src = entry.from === "stock" ? " from the stock" : entry.from === "discard" ? " from a discard pile" : "";
+      var openTxt = entry.opened ? ", opening a new pile" : "";
+      var doneTxt = entry.completed ? " — pile complete!" : "";
+      var cardTxt = entry.rank === 0 ? "a Skip-Bo (as " + entry.standsFor + ")" : ("a " + entry.rank);
+      return { cls: entry.from === "stock" ? "stock" : (entry.who === "human" ? "you" : ""), text: name + " played " + cardTxt + src + openTxt + doneTxt + "." };
+    }
+    case "hand-refill": return { cls: "sys", text: who(entry.who) + "'s hand emptied mid-turn — drew " + entry.n + " more and kept going." };
+    case "discard": return { cls: "sys", text: who(entry.who) + " discarded a " + (entry.rank === 0 ? "Skip-Bo" : entry.rank) + " to pile D" + (entry.pileIdx + 1) + ". Turn over." };
+    case "reshuffle": return { cls: "sys", text: "Draw pile empty — " + entry.n + " cards from completed piles reshuffled back in." };
+    case "strip": return { cls: "sys", text: "Draw pile and completed-pile pool both empty — " + entry.n + " cards pulled from beneath the build piles and reshuffled (every pile keeps its progress)." };
+    case "gridlock": return { cls: "sys", text: "Nothing left anywhere to draw." };
+    case "stalemate": return { cls: "sys", text: "No cards left to draw and no legal moves for either side. Game called as a stalemate to keep things resolvable." };
+    case "win": return { cls: "win", text: who(entry.who) + " emptied their stock pile and wins the game!" };
+    default: return { cls: "sys", text: "" };
+  }
+}
+function renderLog(){
+  var lines = G.log.slice(-80).map(function(e){
+    var r = renderLogEntry(e);
+    return '<div class="logline ' + r.cls + '">' + r.text + '</div>';
+  }).join("");
+  return '<div class="logbox" id="logbox">' + lines + '</div>';
+}
+function renderScore(){
+  var totalDecided = board.humanWins + board.botWins;
+  var winRate = totalDecided ? Math.round(board.humanWins / totalDecided * 100) : 0;
+  var hist = board.history.slice(0, 12).map(function(h){
+    var whoCls = h.winner === "human" ? "you" : (h.winner === "bot" ? "bot" : "draw");
+    var whoText = h.winner === "human" ? "You" : (h.winner === "bot" ? "Computer" : "Draw");
+    var margin = (h.winner !== "draw" && typeof h.loserStockLeft === "number") ? (" · opponent had " + h.loserStockLeft + " left in stock") : "";
+    var d = new Date(h.at);
+    return '<div class="hist-line"><span class="who ' + whoCls + '">' + whoText + '</span><span>' + d.toLocaleDateString() + margin + '</span></div>';
+  }).join("");
+  return '' +
+  '<div class="score">' +
+    '<div class="score-grid">' +
+      '<div class="score-cell' + (board.humanWins >= board.botWins ? ' lead' : '') + '"><div class="nm">You</div><div class="wl">' + board.humanWins + '</div><div class="sub">win' + (board.humanWins === 1 ? '' : 's') + '</div></div>' +
+      '<div class="score-cell' + (board.botWins > board.humanWins ? ' lead' : '') + '"><div class="nm">Computer</div><div class="wl">' + board.botWins + '</div><div class="sub">win' + (board.botWins === 1 ? '' : 's') + '</div></div>' +
+    '</div>' +
+    '<div class="streakline"><span><b>' + board.games + '</b> games played</span><span><b>' + winRate + '%</b> your win rate</span><span><b>' + board.bestStreak + '</b> best streak</span></div>' +
+    (board.streak > 1 ? '<div class="score-note">Current streak: <b style="color:var(--ink)">' + board.streak + '</b> for ' + (board.streakWho === 'human' ? 'you' : 'the computer') + '.</div>' : '') +
+    '<div class="score-note">Recorded automatically the instant a game ends. Stored only in this browser.</div>' +
+    (board.history.length ? '<div class="score-hist">' + hist + '</div>' : '<div class="score-note">No games recorded yet — finish one to start the board.</div>') +
+  '</div>';
+}
+
+function renderOverlay(){
+  if (!G.winner) return "";
+  var cls = G.winner === "human" ? "win" : (G.winner === "bot" ? "lose" : "draw");
+  var title = G.winner === "human" ? "You win!" : (G.winner === "bot" ? "Computer wins" : "Stalemate");
+  var sub;
+  if (G.winner === "draw") sub = "No cards left to draw anywhere and neither side could move.";
+  else {
+    var loser = otherOf(G.winner);
+    sub = (G.winner === "human" ? "You" : "The computer") + " emptied the stock pile first. " +
+      (G.winner === "human" ? "The computer" : "You") + " had " + G.players[loser].stock.length + " card" + (G.players[loser].stock.length === 1 ? "" : "s") + " left in stock.";
+  }
+  return '' +
+  '<div class="overlay"><div class="overlay-card">' +
+    '<h2 class="' + cls + '">' + title + '</h2>' +
+    '<p>' + sub + ' The scoreboard has already been updated.</p>' +
+    '<div class="btnrow"><button class="btn primary" data-action="new-game">Play again</button></div>' +
+  '</div></div>';
+}
+
+function render(){
+  var undoDisabled = !(G.turn === "human" && !G.winner && G.turnHistory.length);
+  app.innerHTML = '' +
+    '<div class="hdr">' +
+      '<div class="brand"><div class="eyebrow">Solo &middot; vs. computer</div><h1>Skip<span class="sb">-Bo</span></h1></div>' +
+      '<div class="hdr-actions">' +
+        '<button class="btn undo" id="undoBtn" data-action="undo"' + (undoDisabled ? ' disabled' : '') + '>&#8630; Undo</button>' +
+        '<button class="btn small" data-action="new-game">New game</button>' +
+      '</div>' +
+    '</div>' +
+    renderStatusBar() +
+    renderBotZone() +
+    renderCenter() +
+    renderYouZone() +
+    '<div class="hint">' + hintText() + '</div>' +
+    '<div class="panel">' +
+      '<div class="tabs">' +
+        '<button class="tab' + (activeTab === "log" ? " on" : "") + '" data-action="tab:log">Play log</button>' +
+        '<button class="tab' + (activeTab === "score" ? " on" : "") + '" data-action="tab:score">Scoreboard</button>' +
+      '</div>' +
+      (activeTab === "log" ? renderLog() : renderScore()) +
+    '</div>' +
+    '<details class="rules"><summary>How Skip-Bo works (quick reference)</summary><div class="body">' +
+      'Empty your <b>30-card stock pile</b> before the computer empties its own — that\'s the whole game. ' +
+      'Each turn you draw back up to <b>5 cards</b> in hand, then play as many cards as you can from your stock, your hand, or the top of your own 4 discard piles onto any shared center pile — each center pile must be built strictly <b>1 through 12</b>, and Skip-Bo cards are wild. Play as many cards as the sequence allows, switching between sources freely. When you can\'t or don\'t want to play more, discard exactly <b>one</b> card from your hand onto one of your own 4 discard piles to end your turn.' +
+    '</div></details>' +
+    '<div class="footer-note">Computer opponent runs a local, rule-based move-scoring engine with a short lookahead — no server, no account, no network calls. Everything, including the scoreboard, is stored only in this browser.</div>' +
+    renderOverlay();
+
+  var logbox = document.getElementById("logbox");
+  if (logbox) logbox.scrollTop = logbox.scrollHeight;
+}
+
+/* ---------- event delegation ---------- */
+app.addEventListener("click", function(e){
+  var srcEl = e.target.closest("[data-src]");
+  var targetEl = e.target.closest("[data-target]");
+  var actionEl = e.target.closest("[data-action]");
+
+  if (actionEl){
+    var action = actionEl.getAttribute("data-action");
+    if (action === "undo"){ doUndo(); return; }
+    if (action === "new-game"){
+      if (!G.winner && !window.confirm("Start a new game? Your current game in progress will be lost.")) return;
+      clearTimeout(botTimer);
+      beginNewGame();
+      return;
+    }
+    if (action === "tab:log"){ activeTab = "log"; render(); return; }
+    if (action === "tab:score"){ activeTab = "score"; render(); return; }
+  }
+  // target clicks take priority when both src+target sit on the same discard button
+  if (targetEl){
+    var t = targetEl.getAttribute("data-target");
+    if (t.indexOf("pile:") === 0){
+      var v = t.slice(5);
+      clickBuildPile(v === "new" ? "new" : parseInt(v, 10));
+      return;
+    }
+    if (t.indexOf("discard:") === 0){
+      clickOwnDiscardPile(parseInt(t.slice(8), 10));
+      return;
+    }
+  }
+  if (srcEl){
+    var s = srcEl.getAttribute("data-src");
+    if (s === "stock"){ selectSource({ type: "stock" }); return; }
+    if (s.indexOf("hand:") === 0){ selectSource({ type: "hand", idx: parseInt(s.slice(5), 10) }); return; }
+    if (s.indexOf("discard:") === 0){ clickOwnDiscardPile(parseInt(s.slice(8), 10)); return; }
+  }
+});
+
+/* ---------- boot ---------- */
+beginNewGame();
+
+})();
+</script>
+</body>
+</html>
