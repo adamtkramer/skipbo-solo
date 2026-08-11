@@ -3,123 +3,114 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-<meta name="theme-color" content="#12141c" />
-<title>Skip-Bo Solo — you vs. the computer</title>
-<meta name="description" content="Play genuine Skip-Bo solo against a computer opponent. Pure client-side, no account, no server — plays forever." />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%2312141c'/%3E%3Ctext x='50' y='66' font-size='46' text-anchor='middle' fill='%23E2572B' font-family='Georgia,serif' font-weight='bold'%3ESB%3C/text%3E%3C/svg%3E" />
+<meta name="theme-color" content="#16303A" />
+<title>Spite &amp; Malice Solo — you vs. the computer</title>
+<meta name="description" content="Solo Spite & Malice against a computer opponent. Two decks, jokers wild, ace through king. Pure client-side, no account, no server." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%2316303A'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23C9A227'%3E%E2%99%A0%3C/text%3E%3C/svg%3E" />
 <style>
 :root{
-  --bg-deep:#0c0e14;
-  --bg-mid:#12141c;
-  --panel:rgba(255,255,255,.045);
-  --panel-strong:rgba(255,255,255,.08);
-  --hairline:rgba(255,255,255,.09);
-  --ink:#F2EFE7;
-  --muted:rgba(242,239,231,.6);
-  --faint:rgba(242,239,231,.4);
-  --accent:#E2572B;
-  --accent-ink:#1a0c07;
-  --blue:#3F8FC4;
-  --gold:#D8A93E;
-  --good:#4CAF7D;
-  --bad:#D9584F;
-  --card-cream:#F6F1E3;
-  --card-cream-dk:#E7DFC9;
+  --ink:#101620;
+  --felt:#16303A;
+  --bone:#F2ECDD;
+  --brass:#C9A227;
+  --jade:#4E9B8A;
+  --bad:#C8544A;
+  --muted:rgba(242,236,221,.6);
+  --faint:rgba(242,236,221,.4);
+  --hairline:rgba(242,236,221,.1);
+  --panel:rgba(0,0,0,.25);
   --radius:14px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;background:radial-gradient(120% 100% at 50% -10%, var(--bg-mid) 0%, var(--bg-deep) 60%);color:var(--ink);}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;overscroll-behavior-y:contain;padding-bottom:24px;}
+html,body{margin:0;padding:0;background:radial-gradient(120% 90% at 50% 0%, var(--felt) 0%, var(--ink) 65%);color:var(--bone);}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;overscroll-behavior-y:contain;padding-bottom:24px;}
 button{font:inherit;cursor:pointer;color:inherit;}
 ::-webkit-scrollbar{width:6px;height:6px;}
-::-webkit-scrollbar-thumb{background:rgba(242,239,231,.18);border-radius:3px;}
+::-webkit-scrollbar-thumb{background:rgba(242,236,221,.18);border-radius:3px;}
 
-#app{max-width:640px;margin:0 auto;padding:12px 10px 32px;display:flex;flex-direction:column;gap:10px;}
+#app{max-width:640px;margin:0 auto;padding:14px 12px 28px;display:flex;flex-direction:column;gap:12px;}
 
 /* ---------- header ---------- */
 .hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:4px 2px 6px;}
-.hdr .brand .eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);}
-.hdr .brand h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(24px,7vw,32px);font-weight:800;margin:2px 0 0;letter-spacing:-.01em;}
-.hdr .brand h1 .sb{color:var(--accent);}
+.hdr .brand .eyebrow{font-family:Georgia,serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);}
+.hdr .brand h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(24px,7vw,34px);font-weight:800;margin:2px 0 0;letter-spacing:-.01em;}
 .hdr-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
-.btn{background:transparent;border:1px solid var(--hairline);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:12px;letter-spacing:.03em;white-space:nowrap;}
-.btn:hover{border-color:rgba(242,239,231,.35);}
+.btn{background:transparent;border:1px solid var(--hairline);color:var(--bone);border-radius:999px;padding:7px 13px;font-size:12px;letter-spacing:.03em;white-space:nowrap;}
+.btn:hover{border-color:rgba(242,236,221,.35);}
 .btn:disabled{opacity:.35;cursor:not-allowed;}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;}
-.btn.undo{background:var(--gold);border-color:var(--gold);color:#241a05;font-weight:800;box-shadow:0 3px 12px rgba(216,169,62,.35);}
+.btn.primary{background:var(--brass);border-color:var(--brass);color:var(--ink);font-weight:700;}
+.btn.undo{background:var(--brass);border-color:var(--brass);color:#241a05;font-weight:800;box-shadow:0 3px 12px rgba(201,162,39,.35);}
 .btn.undo:disabled{background:transparent;color:var(--faint);border-color:var(--hairline);box-shadow:none;}
 .btn.small{padding:5px 10px;font-size:11px;}
 
-/* ---------- turn / status bar ---------- */
-.statusbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--hairline);flex-wrap:wrap;}
-.turnpill{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:rgba(242,239,231,.08);color:var(--muted);}
-.turnpill.mine{background:var(--accent);color:#fff;}
-.turnpill.bot{background:var(--blue);color:#fff;}
-.turnpill.win{background:var(--good);color:#06210f;}
+/* ---------- status bar ---------- */
+.statusbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid var(--hairline);flex-wrap:wrap;}
+.turnpill{font-family:Georgia,serif;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:rgba(242,236,221,.08);color:var(--muted);}
+.turnpill.mine{background:var(--brass);color:var(--ink);}
+.turnpill.bot{background:var(--jade);color:#06210f;}
+.turnpill.win{background:var(--jade);color:#06210f;}
 .turnpill.lose{background:var(--bad);color:#2a0705;}
-.turnpill.draw{background:var(--gold);color:#241a05;}
+.turnpill.draw{background:var(--brass);color:#241a05;}
 .census{font-size:10.5px;color:var(--faint);display:flex;align-items:center;gap:6px;}
-.census .dot{width:6px;height:6px;border-radius:99px;background:var(--good);flex-shrink:0;}
+.census .dot{width:6px;height:6px;border-radius:99px;background:var(--jade);flex-shrink:0;}
 .census.bad .dot{background:var(--bad);}
 .census.bad{color:var(--bad);}
 
 /* ---------- zones ---------- */
 .zone{display:flex;flex-direction:column;gap:6px;}
 .zone-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;justify-content:space-between;}
-.zone-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding:10px;border-radius:var(--radius);background:var(--panel);border:1px solid var(--hairline);}
-.zone-row.you{background:rgba(226,87,43,.06);border-color:rgba(226,87,43,.18);}
-.zone-row.bot{background:rgba(63,143,196,.06);border-color:rgba(63,143,196,.18);}
+.zone-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding:10px;border-radius:var(--radius);background:rgba(255,255,255,.045);border:1px solid var(--hairline);}
+.zone-row.you{background:rgba(201,162,39,.06);border-color:rgba(201,162,39,.18);}
+.zone-row.bot{background:rgba(78,155,138,.08);border-color:rgba(78,155,138,.2);}
 
 .stack-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .stack-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
 .stack-body{position:relative;}
-.count-badge{position:absolute;right:-6px;bottom:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:rgba(12,14,20,.92);border:1px solid var(--hairline);color:var(--ink);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;}
-.count-badge.big{background:var(--accent);color:#fff;border-color:var(--accent);min-width:23px;height:23px;font-size:12px;}
+.count-badge{position:absolute;right:-6px;bottom:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:rgba(16,22,32,.92);border:1px solid var(--hairline);color:var(--bone);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.count-badge.big{background:var(--brass);color:var(--ink);border-color:var(--brass);min-width:23px;height:23px;font-size:12px;}
 
 .discard-row{display:flex;gap:5px;}
 
-.handwrap{display:flex;gap:6px;flex-wrap:wrap;padding:10px 8px;border-radius:var(--radius);background:var(--panel);border:1px solid var(--hairline);min-height:78px;align-items:center;justify-content:center;}
+.handwrap{display:flex;gap:6px;flex-wrap:wrap;padding:10px 8px;border-radius:var(--radius);background:rgba(255,255,255,.045);border:1px solid var(--hairline);min-height:78px;align-items:center;justify-content:center;}
 .hand-empty-note{font-size:12px;color:var(--faint);padding:6px;}
 .bot-hand-mini{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);margin-left:auto;}
-.bot-hand-mini .mini-back{width:15px;height:21px;border-radius:3px;background:repeating-linear-gradient(45deg,#274b58,#274b58 3px,#1b3945 3px,#1b3945 6px);border:1px solid rgba(63,143,196,.4);}
+.bot-hand-mini .mini-back{width:15px;height:21px;border-radius:3px;background:repeating-linear-gradient(45deg,#24435080,#24435080 2px,#16303a80 2px,#16303a80 4px);border:1px solid rgba(242,236,221,.25);}
 
 /* ---------- cards ---------- */
 .card{
-  width:clamp(40px,10.5vw,54px);
-  height:clamp(56px,14.7vw,76px);
+  width:clamp(38px,10vw,50px);
+  height:clamp(54px,14vw,70px);
   border-radius:8px;
-  background:linear-gradient(160deg,var(--card-cream) 0%, var(--card-cream) 55%, var(--card-cream-dk) 100%);
-  border:1px solid rgba(12,14,20,.35);
+  background:linear-gradient(160deg,#FBF7EC 0%, var(--bone) 60%, #E4DCC7 100%);
+  border:1px solid rgba(16,22,32,.35);
   box-shadow:0 2px 6px rgba(0,0,0,.4);
-  display:flex;align-items:center;justify-content:center;flex-direction:column;
-  color:#1a1a1a;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;
+  color:#1A1D24;
   position:relative;
   flex-shrink:0;
 }
-.card .rank{font-family:Georgia,serif;font-weight:800;font-size:clamp(18px,5vw,26px);color:var(--card-color,#1a1a1a);}
-.card.wild{background:linear-gradient(150deg,#3a2a55 0%, #241b3b 55%, #171128 100%);border-color:rgba(216,169,62,.55);box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 0 0 2px rgba(216,169,62,.18);}
-.card.wild .wildLogo{font-family:Georgia,serif;font-weight:800;font-size:clamp(9px,2.6vw,12px);line-height:1.15;text-align:center;color:var(--gold);letter-spacing:.02em;}
-.card.wild .wildAs{font-family:Georgia,serif;font-weight:800;font-size:clamp(16px,4.6vw,23px);color:var(--gold);}
-.card.wild .wildAs::after{content:"*";font-size:.55em;vertical-align:top;margin-left:1px;}
-.card.back{background:repeating-linear-gradient(45deg,#22334a,#22334a 4px,#182838 4px,#182838 8px);border:1px solid rgba(63,143,196,.4);box-shadow:inset 0 0 0 3px rgba(63,143,196,.14),0 2px 6px rgba(0,0,0,.4);}
-.card.empty{background:transparent;border:1px dashed rgba(242,239,231,.2);box-shadow:none;}
-.card.slot{background:transparent;border:1px dashed rgba(242,239,231,.28);box-shadow:none;color:var(--faint);font-family:Georgia,serif;font-size:20px;}
+.card .rank{font-family:Georgia,serif;font-weight:800;font-size:clamp(15px,4.4vw,22px);line-height:1;}
+.card .suit{font-size:clamp(11px,3vw,14px);line-height:1;opacity:.9;}
+.card.wild{background:linear-gradient(160deg,#F6E9BE 0%,#EBD9A2 100%);border:1px solid var(--brass);}
+.card.wild .rank,.card.wild .suit{color:#8A6A18;}
+.card.back{background:repeating-linear-gradient(45deg,#274b58,#274b58 3px,#1b3945 3px,#1b3945 6px);border:1px solid rgba(201,162,39,.35);box-shadow:inset 0 0 0 3px rgba(201,162,39,.14),0 2px 6px rgba(0,0,0,.4);}
+.card.empty{background:transparent;border:1px dashed rgba(242,236,221,.2);box-shadow:none;}
+.card.slot{background:transparent;border:1px dashed rgba(242,236,221,.28);box-shadow:none;color:var(--faint);font-family:Georgia,serif;font-size:18px;}
 
 .cardbtn{background:none;border:none;padding:0;border-radius:9px;position:relative;}
-.cardbtn.playable .card{box-shadow:0 0 0 2px rgba(76,175,125,.55),0 2px 6px rgba(0,0,0,.4);}
-.cardbtn.selected .card{outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-4px);}
+.cardbtn.playable .card{box-shadow:0 0 0 2px rgba(78,155,138,.55),0 2px 6px rgba(0,0,0,.4);}
+.cardbtn.selected .card{outline:3px solid var(--brass);outline-offset:2px;transform:translateY(-4px);}
 .cardbtn.legal-target .card,.pile-slot.legal-target .card,.pile-slot.legal-target .slot{animation:pulse 1.4s ease-in-out infinite;}
 .cardbtn:disabled{cursor:default;}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(216,169,62,.6);}50%{box-shadow:0 0 0 8px rgba(216,169,62,0);}}
-@media (prefers-reduced-motion:reduce){.cardbtn.legal-target .card,.pile-slot.legal-target .card,.pile-slot.legal-target .slot{animation:none;outline:2px dashed var(--gold);}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,162,39,.6);}50%{box-shadow:0 0 0 8px rgba(201,162,39,0);}}
+@media (prefers-reduced-motion:reduce){.cardbtn.legal-target .card,.pile-slot.legal-target .card,.pile-slot.legal-target .slot{animation:none;outline:2px dashed var(--brass);}}
 
-/* discard fan (small stacked look, top card only truly interactive) */
 .fan{display:flex;flex-direction:column;align-items:center;gap:3px;}
 .fan .fan-label{font-size:9px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase;}
 .fan .fan-count{margin-left:3px;opacity:.7;}
 
 /* ---------- center ---------- */
-.center{display:flex;gap:10px;align-items:center;padding:12px 10px;border-radius:var(--radius);background:rgba(255,255,255,.03);border:1px solid var(--hairline);flex-wrap:wrap;justify-content:center;}
+.center{display:flex;gap:10px;align-items:center;padding:12px 10px;border-radius:var(--radius);background:rgba(0,0,0,.22);border:1px solid var(--hairline);flex-wrap:wrap;justify-content:center;}
 .center-side{display:flex;gap:8px;}
 .build-row{display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:center;align-items:flex-end;}
 .pile-slot{display:flex;flex-direction:column;align-items:center;gap:4px;}
@@ -128,52 +119,51 @@ button{font:inherit;cursor:pointer;color:inherit;}
 
 /* ---------- hint / log / tabs ---------- */
 .hint{font-size:12px;color:var(--muted);min-height:16px;text-align:center;padding:0 6px;}
-.panel{border-radius:var(--radius);background:var(--panel);border:1px solid var(--hairline);overflow:hidden;}
+.panel{border-radius:var(--radius);background:rgba(0,0,0,.25);border:1px solid var(--hairline);overflow:hidden;}
 .tabs{display:flex;border-bottom:1px solid var(--hairline);}
 .tab{flex:1;background:transparent;border:none;padding:10px 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
-.tab.on{background:var(--panel-strong);color:var(--ink);}
+.tab.on{background:rgba(242,236,221,.07);color:var(--bone);}
 .logbox{max-height:190px;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
 .logline{font-size:12.5px;color:var(--muted);}
-.logline.you{color:var(--ink);}
-.logline.stock{color:var(--gold);}
+.logline.you{color:var(--bone);}
+.logline.stock{color:var(--brass);}
 .logline.sys{color:var(--faint);font-style:italic;}
-.logline.win{color:var(--good);font-weight:700;}
+.logline.win{color:var(--jade);font-weight:700;}
 
 .score{padding:14px;display:flex;flex-direction:column;gap:12px;}
 .score-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.score-cell{padding:12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--hairline);text-align:center;}
-.score-cell.lead{background:rgba(226,87,43,.12);border-color:rgba(226,87,43,.4);}
+.score-cell{padding:12px;border-radius:10px;background:rgba(242,236,221,.05);border:1px solid var(--hairline);text-align:center;}
+.score-cell.lead{background:rgba(201,162,39,.12);border-color:rgba(201,162,39,.4);}
 .score-cell .nm{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
 .score-cell .wl{font-family:Georgia,serif;font-size:26px;font-weight:800;margin-top:2px;}
 .score-cell .sub{font-size:11px;color:var(--faint);margin-top:3px;}
 .score-note{font-size:11.5px;color:var(--faint);line-height:1.5;text-align:center;}
 .score-hist{display:flex;flex-direction:column;gap:4px;font-size:12px;max-height:150px;overflow-y:auto;}
 .hist-line{display:flex;justify-content:space-between;gap:8px;padding:4px 2px;border-bottom:1px solid var(--hairline);}
-.hist-line .who.you{color:var(--accent);font-weight:700;}
-.hist-line .who.bot{color:var(--blue);font-weight:700;}
-.hist-line .who.draw{color:var(--gold);font-weight:700;}
-.streakline{display:flex;justify-content:center;gap:18px;font-size:11.5px;color:var(--muted);}
-.streakline b{color:var(--ink);}
+.hist-line .who.you{color:var(--brass);font-weight:700;}
+.hist-line .who.bot{color:var(--jade);font-weight:700;}
+.hist-line .who.draw{color:var(--muted);font-weight:700;}
+.streakline{display:flex;justify-content:center;gap:18px;font-size:11.5px;color:var(--muted);flex-wrap:wrap;}
+.streakline b{color:var(--bone);}
 
 /* ---------- rules / info ---------- */
-details.rules{border-radius:var(--radius);background:var(--panel);border:1px solid var(--hairline);padding:2px 4px;}
+details.rules{border-radius:var(--radius);background:rgba(255,255,255,.045);border:1px solid var(--hairline);padding:2px 4px;}
 details.rules summary{cursor:pointer;padding:9px 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);list-style:none;}
 details.rules summary::-webkit-details-marker{display:none;}
 details.rules .body{padding:2px 12px 14px;font-size:12.5px;color:var(--muted);line-height:1.6;}
-details.rules .body b{color:var(--ink);}
+details.rules .body b{color:var(--bone);}
 
 /* ---------- overlay / winner ---------- */
 .overlay{position:fixed;inset:0;background:rgba(6,7,10,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}
-.overlay-card{background:var(--bg-mid);border:1px solid var(--hairline);border-radius:18px;padding:28px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.overlay-card{background:var(--felt);border:1px solid var(--hairline);border-radius:18px;padding:28px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);}
 .overlay-card h2{font-family:Georgia,serif;font-size:28px;margin:0 0 8px;}
-.overlay-card h2.win{color:var(--good);}
+.overlay-card h2.win{color:var(--jade);}
 .overlay-card h2.lose{color:var(--bad);}
-.overlay-card h2.draw{color:var(--gold);}
+.overlay-card h2.draw{color:var(--brass);}
 .overlay-card p{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 18px;}
 .overlay-card .btnrow{display:flex;gap:8px;justify-content:center;}
 
 .footer-note{text-align:center;font-size:10.5px;color:var(--faint);padding:10px 4px 0;line-height:1.6;}
-.footer-note a{color:var(--muted);}
 
 @media (max-width:380px){
   .score-grid{grid-template-columns:1fr;}
@@ -188,13 +178,19 @@ details.rules .body b{color:var(--ink);}
 "use strict";
 
 /* ============================================================
-   SKIP-BO SOLO — genuine Skip-Bo rules, single file, no network.
-   162-card deck (144 number cards 1-12 x12, 18 Skip-Bo wilds).
-   30-card stock pile each, 5-card hand, 4 personal discard piles.
-   Unlimited shared center build piles, 1 through 12, wilds are
-   universal. Computer opponent is a deterministic, rule-based JS
-   engine (scoring + shallow rollout simulation) — no network
-   calls of any kind are made to decide its moves.
+   SPITE & MALICE — SOLO, single file, no network.
+   2 standard decks + 4 jokers = 108 cards, every card tracked.
+   15-card stock pile each (house rule) · 5-card hand ·
+   4 personal discard piles each, never reshuffled.
+   Shared center build piles run Ace through King (13 ranks),
+   up to 12 piles open at once. Jokers (4 total) are wild;
+   Kings are ordinary cards, NOT wild.
+   Computer opponent is a fully local, deterministic, rule-based
+   JS engine: a full-turn rollout search (tries every legal first
+   move, plays the rest of that turn out greedily, keeps the line
+   that moves the most stock cards and scores best) plus a
+   heuristic evaluator. No network/LLM calls of any kind happen
+   anywhere in this file.
    ============================================================ */
 
 /* ---------- persistent local storage (this browser only, no backend) ---------- */
@@ -224,22 +220,37 @@ function shuffle(arr){
   return a;
 }
 
-/* ---------- deck ---------- */
-var STOCK_SIZE = 30, HAND_SIZE = 5, PILE_TOP = 12;
-var PALETTE = ["#C0392B","#2E6F9E","#2E9E5B","#B7871E","#7B4FA0","#1E8E86"];
+/* ---------- deck: 2 standard decks + 4 jokers ---------- */
+var SUITS = [
+  { k: "S", g: "♠", red: false },
+  { k: "H", g: "♥", red: true },
+  { k: "D", g: "♦", red: true },
+  { k: "C", g: "♣", red: false }
+];
+var RANK_LABEL = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+var STOCK_SIZE = 15, HAND_SIZE = 5, PILE_TOP = 13, MAX_PILES = 12;
+var FULL_DECK_SIZE = 108;
+
 function buildDeck(){
-  var cards = [], id = 0;
-  for (var r = 1; r <= 12; r++){ for (var c = 0; c < 12; c++){ cards.push({ id: "n" + (id++), rank: r }); } }
-  for (var w = 0; w < 18; w++){ cards.push({ id: "w" + (id++), rank: 0 }); }
+  var cards = [];
+  [1,2].forEach(function(copy){
+    SUITS.forEach(function(s){
+      for (var r = 1; r <= 13; r++){ cards.push({ id: copy + s.k + r, rank: r, suit: s.k, copy: copy }); }
+    });
+    cards.push({ id: copy + "JKa", rank: 0, suit: null, copy: copy });
+    cards.push({ id: copy + "JKb", rank: 0, suit: null, copy: copy });
+  });
   return cards;
 }
-var FULL_DECK_SIZE = 162;
+var cardValue = function(c){ return c.rank === 0 ? 20 : (c.rank >= 11 ? 10 : c.rank); };
+var label = function(c){ return c.rank === 0 ? "★" : RANK_LABEL[c.rank - 1]; };
+var suitGlyph = function(c){ return c.suit ? SUITS.filter(function(s){ return s.k === c.suit; })[0].g : ""; };
+var isRed = function(c){ return c.suit ? SUITS.filter(function(s){ return s.k === c.suit; })[0].red : false; };
 var top = function(pile){ return pile && pile.length ? pile[pile.length - 1] : null; };
 var pileValue = function(pile){ return pile.base + pile.cards.length; };
 var canPlaceOnPile = function(card, pile){ return !!card && pileValue(pile) < PILE_TOP && (card.rank === 0 || card.rank === pileValue(pile) + 1); };
-var canStartNewPile = function(card){ return !!card && (card.rank === 0 || card.rank === 1); };
+var canStartNewPile = function(card, buildLen){ return !!card && buildLen < MAX_PILES && (card.rank === 0 || card.rank === 1); };
 function otherOf(who){ return who === "human" ? "bot" : "human"; }
-function label(card){ return card.rank === 0 ? "a Skip-Bo" : ("a " + card.rank); }
 
 /* ---------- game setup ---------- */
 function freshPlayer(){ return { stock: [], hand: [], discards: [[], [], [], []] }; }
@@ -250,15 +261,16 @@ function newGame(starter){
   for (var j = 0; j < HAND_SIZE; j++){ players.human.hand.push(deck.pop()); players.bot.hand.push(deck.pop()); }
   return {
     draw: deck,
-    used: [],
+    used: [],           // completed King piles, reshuffle pool #1
     build: [],
     players: players,
     turn: starter,
     winner: null,
+    passes: 0,
     pileSeq: 0,
+    scored: false,
     log: [{ kind: "deal" }],
-    turnHistory: [],
-    gridlockStrikes: 0
+    turnHistory: []
   };
 }
 
@@ -278,21 +290,32 @@ function takeSourceCard(g, who, src){
   return null;
 }
 
-/* ---------- drawing / reshuffle / last-resort strip ---------- */
+/* ---------- drawing / reshuffle / last-resort strip ----------
+   Discard piles are NEVER touched. Fallback order when the draw
+   pile is empty: (1) reshuffle the completed-King-pile pool,
+   (2) only if that is ALSO empty, strip every card except the
+   TOP card off each center pile and shuffle the rest into a
+   fresh draw pile — each pile's "base" count keeps tracking its
+   rank separately from its physical card count, so this never
+   corrupts a pile's progress. ---------- */
+function stripCenterPiles(g){
+  var pool = [];
+  g.build.forEach(function(pile){
+    if (pile.cards.length > 1){
+      var under = pile.cards.splice(0, pile.cards.length - 1);
+      pile.base += under.length;
+      pool.push.apply(pool, under);
+    }
+  });
+  return pool;
+}
 function drawOne(g, silent){
   if (!g.draw.length){
     if (g.used.length){
       g.draw = shuffle(g.used); g.used = [];
       if (!silent) g.log.push({ kind: "reshuffle", n: g.draw.length });
     } else {
-      var pool = [];
-      g.build.forEach(function(pile){
-        if (pile.cards.length > 1){
-          var under = pile.cards.splice(0, pile.cards.length - 1);
-          pile.base += under.length;
-          pool.push.apply(pool, under);
-        }
-      });
+      var pool = stripCenterPiles(g);
       if (pool.length){
         g.draw = shuffle(pool);
         if (!silent) g.log.push({ kind: "strip", n: pool.length });
@@ -313,8 +336,9 @@ function refillHand(g, who, target, silent){
   }
   return drew;
 }
+function hasAnyLegalPlay(g, who){ return legalPlaysFor(g, who).length > 0; }
 
-/* ---------- applying a play / discard (used for both real moves and AI simulation) ---------- */
+/* ---------- applying a play / discard (used for real moves and AI simulation) ---------- */
 function applyPlay(g, who, src, pileIdx, opts){
   opts = opts || {};
   var card = takeSourceCard(g, who, src);
@@ -345,6 +369,7 @@ function applyPlay(g, who, src, pileIdx, opts){
     var drew = refillHand(g, who, HAND_SIZE, opts.silent);
     if (drew > 0 && !opts.silent) g.log.push({ kind: "hand-refill", who: who, n: drew });
   }
+  if (!opts.silent) g.passes = 0;
   return true;
 }
 function applyDiscard(g, who, handIdx, pileIdx, opts){
@@ -352,15 +377,26 @@ function applyDiscard(g, who, handIdx, pileIdx, opts){
   var p = g.players[who];
   var card = p.hand.splice(handIdx, 1)[0];
   p.discards[pileIdx].push(card);
-  if (!opts.silent) g.log.push({ kind: "discard", who: who, rank: card.rank, pileIdx: pileIdx });
+  if (!opts.silent){
+    g.log.push({ kind: "discard", who: who, rank: card.rank, suit: card.suit, pileIdx: pileIdx });
+    g.passes = 0;
+  }
   return true;
+}
+function applyPass(g, who){
+  g.passes = (g.passes || 0) + 1;
+  g.log.push({ kind: "pass", who: who });
+  if (g.passes >= 2 && !g.players[who].hand.length){
+    g.winner = "draw";
+    g.log.push({ kind: "stalemate" });
+  }
 }
 
 /* ---------- legal move enumeration ---------- */
 function addMovesForCard(g, card, src, moves){
   if (!card) return;
   g.build.forEach(function(pile, i){ if (canPlaceOnPile(card, pile)) moves.push({ src: src, pileIdx: i }); });
-  if (canStartNewPile(card)) moves.push({ src: src, pileIdx: "new" });
+  if (canStartNewPile(card, g.build.length)) moves.push({ src: src, pileIdx: "new" });
 }
 function legalPlaysFor(g, who){
   var p = g.players[who], moves = [];
@@ -369,7 +405,6 @@ function legalPlaysFor(g, who){
   p.discards.forEach(function(pile, i){ addMovesForCard(g, pile.length ? pile[pile.length - 1] : null, { type: "discard", idx: i }, moves); });
   return moves;
 }
-function hasAnyLegalPlay(g, who){ return legalPlaysFor(g, who).length > 0; }
 
 /* ---------- deep clone for undo + AI simulation ---------- */
 function cloneG(g){
@@ -380,92 +415,176 @@ function cloneG(g){
 
 /* ============================================================
    COMPUTER OPPONENT — fully local, deterministic, rule-based.
-   For every candidate move we compute a heuristic score, then
-   run a short greedy rollout on a cloned state to see how many
-   additional stock cards that choice would let us chain-empty.
-   No network/API calls happen anywhere in this file.
+   No blocking/defensive logic anywhere (never looks at the
+   human's hand, stock, or discard piles when deciding) EXCEPT
+   that its own stock card, whenever legally playable, is always
+   played immediately, choosing the least-generous legal pile.
+   Everything else is chosen via a full-turn rollout search: try
+   every legal non-stock move, play the rest of that turn out
+   greedily on a clone, and keep the line that (1) moves the most
+   stock cards, then (2) leaves the best evaluated position.
    ============================================================ */
-function shallowBestMove(g, who, moves){
-  var best = null, bestScore = -Infinity;
-  for (var i = 0; i < moves.length; i++){
-    var m = moves[i], c = peekSourceCard(g, who, m.src), s = 0;
-    if (m.src.type === "stock") s += 100;
-    if (c.rank === 0) s -= 10;
-    var pv = m.pileIdx === "new" ? 0 : pileValue(g.build[m.pileIdx]);
-    if (pv + 1 === PILE_TOP) s += 50;
-    if (s > bestScore){ bestScore = s; best = m; }
+
+/* whenever the stock card is a wild, several piles may qualify —
+   pick the LEAST generous one (highest current value / most spent),
+   preserving low or freshly-opened piles for hand & discard plays. */
+function chooseStockTarget(g, who, stockCard){
+  var eligible = [];
+  g.build.forEach(function(pile, i){ if (canPlaceOnPile(stockCard, pile)) eligible.push({ idx: i, val: pileValue(pile) }); });
+  if (eligible.length){
+    eligible.sort(function(a, b){ return b.val - a.val; });
+    return { pileIdx: eligible[0].idx };
   }
-  return best;
+  if (canStartNewPile(stockCard, g.build.length)) return { pileIdx: "new" };
+  return null;
 }
-function rollout(gClone, who, steps){
-  var count = 0;
-  for (var i = 0; i < steps; i++){
-    var moves = legalPlaysFor(gClone, who);
-    if (!moves.length) break;
-    var best = shallowBestMove(gClone, who, moves);
-    var wasStock = best.src.type === "stock";
-    applyPlay(gClone, who, best.src, best.pileIdx, { silent: true });
-    if (wasStock) count++;
-    if (gClone.winner) break;
-  }
-  return count;
+
+/* how close a candidate target's next-needed rank sits to the bot's
+   OWN stock-top rank — closer is better, it funnels center piles
+   toward eventually accepting the stock card. */
+function proximityToOwnStock(g, who, nextNeeded){
+  var stockCard = top(g.players[who].stock);
+  if (!stockCard || stockCard.rank === 0) return 0;
+  return -Math.abs(nextNeeded - stockCard.rank);
 }
-function scoreMove(g, who, move){
+
+/* cheap per-move heuristic used both to rank the rollout's root
+   candidates for tie-breaking and to drive the greedy continuation
+   deeper into each simulated turn. */
+function scoreCandidateMove(g, who, move){
   var card = peekSourceCard(g, who, move.src);
-  var score = 0;
-  if (move.src.type === "stock") score += 1000;      // always top priority: progress toward emptying stock
-  if (move.src.type === "discard") score += 15;        // slight bonus for unloading a discard pile
-  if (card.rank === 0) score -= 25;                     // save wilds when a natural card would do
-  if (move.pileIdx === "new") score -= 8;               // mild preference for extending piles over fragmenting
+  var nextNeeded = move.pileIdx === "new" ? 1 : pileValue(g.build[move.pileIdx]) + 1;
+  var s = 0;
+  if (move.src.type === "discard") s += 8;         // unloading a discard pile keeps it flexible
+  if (card.rank === 0) s -= 15;                     // reserve wilds when a natural card would do
+  if (card.rank === 1) s -= 6;                      // mild reluctance to spend aces (reserve value)
+  if (move.pileIdx === "new") s -= 5;                // prefer extending piles over fragmenting
+  if (nextNeeded === PILE_TOP) s += 40;               // finishing a pile with the King clears clutter
+  s += proximityToOwnStock(g, who, nextNeeded) * 3;   // funnel piles toward the bot's own stock rank
+  return s;
+}
+
+/* full-turn rollout: apply `firstMove`, then keep playing the rest
+   of the turn out greedily (stock-priority still applies mid-turn),
+   returning how many stock cards got moved and the final position. */
+function rolloutFrom(g, who, firstMove){
   var clone = cloneG(g);
-  var usedBefore = g.used.length;
-  applyPlay(clone, who, move.src, move.pileIdx, { silent: true });
-  if (clone.used.length > usedBefore) score += 400;     // completing a pile clears clutter, big value
-  if (move.src.type === "hand" && clone.players[who].hand.length === 0) score += 20;
-  score += rollout(clone, who, 5) * 60;                 // lookahead: reward chains that keep emptying the stock
+  applyPlay(clone, who, firstMove.src, firstMove.pileIdx, { silent: true });
+  var stockMoved = firstMove.src.type === "stock" ? 1 : 0;
+  var iter = 0;
+  while (iter++ < 150 && !clone.winner){
+    var sc = top(clone.players[who].stock);
+    if (sc){
+      var tgt = chooseStockTarget(clone, who, sc);
+      if (tgt){ applyPlay(clone, who, { type: "stock" }, tgt.pileIdx, { silent: true }); stockMoved++; continue; }
+    }
+    var rest = legalPlaysFor(clone, who).filter(function(m){ return m.src.type !== "stock"; });
+    if (!rest.length) break;
+    var best = null, bestScore = -Infinity;
+    for (var i = 0; i < rest.length; i++){
+      var s = scoreCandidateMove(clone, who, rest[i]);
+      if (s > bestScore){ bestScore = s; best = rest[i]; }
+    }
+    applyPlay(clone, who, best.src, best.pileIdx, { silent: true });
+  }
+  return { stockMoved: stockMoved, endState: clone };
+}
+
+/* heuristic evaluator of a resting position, purely from the bot's
+   own side of the board — never references the human's cards. */
+function evalPos(g, who){
+  var p = g.players[who];
+  var score = 0;
+
+  // 1) OPTIONS — distinct reachable ranks among stock top + hand + discard tops
+  var ranks = {};
+  var pool = [top(p.stock)].concat(p.hand, p.discards.map(top)).filter(Boolean);
+  pool.forEach(function(c){
+    if (c.rank === 0){
+      g.build.forEach(function(pile){ if (pileValue(pile) < PILE_TOP) ranks["W" + pileValue(pile)] = 1; });
+      if (canStartNewPile(c, g.build.length)) ranks.NEW = 1;
+    } else {
+      var reachable = g.build.some(function(pile){ return canPlaceOnPile(c, pile); });
+      if (reachable || (c.rank === 1 && g.build.length < MAX_PILES)) ranks[c.rank] = 1;
+    }
+  });
+  score += Object.keys(ranks).length * 10;
+
+  // 2) DESCENDING RUNS — discard piles that read as a descending playable
+  //    run from the top (e.g. 8,7,6) are well organized; reward superlinearly.
+  p.discards.forEach(function(pile){
+    if (!pile.length) return;
+    var streak = 1;
+    for (var i = pile.length - 1; i > 0; i--){
+      var a = pile[i], b = pile[i - 1];
+      if (a.rank !== 0 && b.rank !== 0 && b.rank === a.rank - 1) streak++; else break;
+    }
+    score += streak * streak * 3;
+  });
+
+  // 3) CLUTTER — hand cards that can't reach any pile right now AND don't
+  //    help set up the bot's own stock rank are penalized.
+  var stockCard = top(p.stock);
+  var stockRank = stockCard ? stockCard.rank : null;
+  p.hand.forEach(function(c){
+    var playableNow = c.rank === 0 || g.build.some(function(pile){ return canPlaceOnPile(c, pile); }) || (c.rank === 1 && g.build.length < MAX_PILES);
+    if (!playableNow){
+      var helpsStock = stockRank && stockRank !== 0 && Math.abs(c.rank - stockRank) <= 2;
+      if (!helpsStock) score -= 6;
+    }
+  });
+
+  // 4) RESERVE VALUE — holding an ace or joker back to open a fresh pile later
+  if (p.hand.some(function(c){ return c.rank === 0; })) score += 12;
+  if (p.hand.some(function(c){ return c.rank === 1; })) score += 5;
+
+  // 5) a pile sitting close to the bot's own stock rank is worth keeping around
+  if (stockRank && stockRank !== 0){
+    var bestDist = 99;
+    g.build.forEach(function(pile){ var need = pileValue(pile) + 1; if (need <= PILE_TOP) bestDist = Math.min(bestDist, Math.abs(need - stockRank)); });
+    if (bestDist < 99) score += (PILE_TOP - bestDist);
+  }
+
+  // 6) overall stock progress as a tiebreak
+  score += (STOCK_SIZE - p.stock.length) * 2;
+
   return score;
 }
-function pickBestMove(g, who){
-  var moves = legalPlaysFor(g, who);
-  if (!moves.length) return null;
-  var best = null, bestScore = -Infinity;
+
+/* root-level choice among the bot's legal NON-stock moves: fully
+   roll each one out to the end of the turn and keep the line that
+   moves the most stock cards, then the best evaluated position. */
+function chooseBestRootMove(g, who, moves){
+  var best = null, bestStock = -1, bestEval = -Infinity;
   for (var i = 0; i < moves.length; i++){
-    var s = scoreMove(g, who, moves[i]);
-    if (s > bestScore){ bestScore = s; best = moves[i]; }
+    var r = rolloutFrom(g, who, moves[i]);
+    var ev = evalPos(r.endState, who);
+    if (r.stockMoved > bestStock || (r.stockMoved === bestStock && ev > bestEval)){
+      bestStock = r.stockMoved; bestEval = ev; best = moves[i];
+    }
   }
   return best;
 }
-function scoreDiscard(g, who, handIdx, pileIdx){
-  var p = g.players[who], card = p.hand[handIdx];
-  var score = 0;
-  if (card.rank === 0) score -= 200;                    // strongly avoid discarding wilds
-  var minDist = 99;
-  g.build.forEach(function(pile){
-    var need = pileValue(pile) + 1;
-    if (need <= PILE_TOP) minDist = Math.min(minDist, Math.abs(card.rank - need));
-  });
-  if (!g.build.length) minDist = Math.abs(card.rank - 1);
-  score += Math.min(minDist, 11) * 6;                   // farther from any pile's need = safer to bury
-  var pile = p.discards[pileIdx];
-  score -= pile.length * 2;                             // mild preference to spread across piles
-  var buriedTop = top(pile);
-  if (buriedTop){
-    var buriedUseful = 12;
-    g.build.forEach(function(bp){
-      var need = pileValue(bp) + 1;
-      if (need <= PILE_TOP) buriedUseful = Math.min(buriedUseful, Math.abs(buriedTop.rank - need));
-    });
-    score -= Math.max(0, 6 - buriedUseful) * 3;          // avoid burying a card that's close to useful
-  }
-  return score;
-}
-function pickBestDiscard(g, who){
+
+/* discard choice at end of turn: never a wild/ace if avoidable, bury
+   the least useful card, and prefer extending a descending run. */
+function chooseDiscard(g, who){
   var p = g.players[who];
   if (!p.hand.length) return null;
   var best = null, bestScore = -Infinity;
   for (var hi = 0; hi < p.hand.length; hi++){
+    var c = p.hand[hi];
     for (var pi = 0; pi < 4; pi++){
-      var s = scoreDiscard(g, who, hi, pi);
+      var s = 0;
+      if (c.rank === 0) s -= 200;
+      else if (c.rank === 1) s -= 40;
+      var minDist = 99;
+      g.build.forEach(function(pile){ var need = pileValue(pile) + 1; if (need <= PILE_TOP) minDist = Math.min(minDist, Math.abs(c.rank - need)); });
+      if (!g.build.length) minDist = Math.abs(c.rank - 1);
+      s += Math.min(minDist, 12) * 4;
+      var topC = top(p.discards[pi]);
+      if (topC && topC.rank !== 0 && c.rank !== 0 && topC.rank === c.rank + 1) s += 30;
+      s -= p.discards[pi].length;
       if (s > bestScore){ bestScore = s; best = { handIdx: hi, pileIdx: pi }; }
     }
   }
@@ -475,41 +594,37 @@ function pickBestDiscard(g, who){
 /* ---------- gridlock / stalemate safety valve ---------- */
 function checkGridlock(g){
   if (g.winner) return;
-  if (!g.draw.length && !g.used.length && !hasAnyLegalPlay(g, "human") && !hasAnyLegalPlay(g, "bot")){
-    g.gridlockStrikes = (g.gridlockStrikes || 0) + 1;
-    if (g.gridlockStrikes >= 1){
-      g.winner = "draw";
-      g.log.push({ kind: "stalemate" });
-    }
+  if (!g.draw.length && !g.used.length && !hasAnyLegalPlay(g, "human") && !hasAnyLegalPlay(g, "bot") &&
+      !g.players.human.hand.length && !g.players.bot.hand.length){
+    g.winner = "draw";
+    g.log.push({ kind: "stalemate" });
   }
 }
 
-/* ---------- census (integrity self-check) ---------- */
+/* ---------- census (integrity self-check): 108 cards, 4 jokers, every rank/suit pair x2 ---------- */
 function census(g){
   var counts = {}, total = 0;
-  function add(arr){ arr.forEach(function(c){ total++; var k = c.rank === 0 ? "SB" : "n" + c.rank; counts[k] = (counts[k] || 0) + 1; }); }
+  function add(arr){ arr.forEach(function(c){ total++; var k = c.rank === 0 ? "JOKER" : (c.suit + c.rank); counts[k] = (counts[k] || 0) + 1; }); }
   add(g.draw); add(g.used);
   g.build.forEach(function(p){ add(p.cards); });
   ["human", "bot"].forEach(function(w){ add(g.players[w].stock); add(g.players[w].hand); g.players[w].discards.forEach(add); });
-  var ok = total === FULL_DECK_SIZE && (counts.SB || 0) <= 18;
-  var declaredWild = 0, physicalWild = counts.SB || 0;
-  // account for base-stripped cards still counted implicitly via draw/used pools; base cards are
-  // physically already in draw/used, so no separate tally needed beyond total count check.
+  var ok = total === FULL_DECK_SIZE && (counts.JOKER || 0) === 4;
   var dupes = [];
-  for (var r = 1; r <= 12; r++){
-    var want = 12, have = counts["n" + r] || 0;
-    if (have !== want) { ok = false; dupes.push(r + "×" + have); }
+  for (var key in counts){
+    if (key === "JOKER") continue;
+    if (counts[key] !== 2) { ok = false; dupes.push(key + "×" + counts[key]); }
   }
-  if (physicalWild !== 18) ok = false;
   return { ok: ok, total: total, dupes: dupes };
 }
 
 /* ============================================================
    SCOREBOARD — persisted via window.storage, updates the instant
-   a game ends, no manual step required.
+   a game ends. Winner scores the point value of everything left
+   in the loser's stock pile: wild(joker)=20, face(J/Q/K)=10,
+   ace=1, else its number. No flat bonus for winning.
    ============================================================ */
 function loadBoard(){
-  return window.storage.get("board", { games: 0, humanWins: 0, botWins: 0, draws: 0, streak: 0, streakWho: null, bestStreak: 0, history: [] });
+  return window.storage.get("board", { games: 0, humanWins: 0, botWins: 0, draws: 0, humanPts: 0, botPts: 0, streak: 0, streakWho: null, bestStreak: 0, history: [] });
 }
 function saveBoard(b){ window.storage.set("board", b); }
 function recordResult(g){
@@ -521,8 +636,10 @@ function recordResult(g){
     board.streak = 0; board.streakWho = null;
   } else {
     var loser = otherOf(g.winner);
-    var leftover = g.players[loser].stock.length;
-    entry.loserStockLeft = leftover;
+    var stock = g.players[loser].stock;
+    var pts = stock.reduce(function(s, c){ return s + cardValue(c); }, 0);
+    entry.pts = pts; entry.loserStockLeft = stock.length;
+    if (g.winner === "human") board.humanPts += pts; else board.botPts += pts;
     if (g.winner === "human") board.humanWins += 1; else board.botWins += 1;
     if (board.streakWho === g.winner) board.streak += 1; else { board.streak = 1; board.streakWho = g.winner; }
     if (board.streak > board.bestStreak) board.bestStreak = board.streak;
@@ -538,20 +655,15 @@ function recordResult(g){
    ============================================================ */
 var G = null;
 var board = loadBoard();
-var selected = null;          // { type, idx? }
+var selected = null;
 var activeTab = "log";
 var botTimer = null;
 
 function startTurn(who){
   G.turn = who;
-  if (who === "human"){
-    G.turnHistory = [];
-    refillHand(G, "human", HAND_SIZE);
-    checkGridlock(G);
-  } else {
-    refillHand(G, "bot", HAND_SIZE);
-    checkGridlock(G);
-  }
+  if (who === "human") G.turnHistory = [];
+  refillHand(G, who, HAND_SIZE);
+  checkGridlock(G);
 }
 function beginNewGame(){
   var starter = (board.games % 2 === 0) ? "human" : "bot";
@@ -597,7 +709,7 @@ function selectSource(src){
 function clickBuildPile(pileIdx){
   if (!isMyTurnPlayable() || !selected) return;
   var card = peekSourceCard(G, "human", selected);
-  var legal = pileIdx === "new" ? canStartNewPile(card) : canPlaceOnPile(card, G.build[pileIdx]);
+  var legal = pileIdx === "new" ? canStartNewPile(card, G.build.length) : canPlaceOnPile(card, G.build[pileIdx]);
   if (!legal) return;
   pushUndo();
   applyPlay(G, "human", selected, pileIdx);
@@ -615,6 +727,12 @@ function clickOwnDiscardPile(pileIdx){
   }
   selectSource({ type: "discard", idx: pileIdx });
 }
+function passTurnHuman(){
+  if (!isMyTurnPlayable() || G.players.human.hand.length) return;
+  pushUndo();
+  applyPass(G, "human");
+  afterHumanAction(true);
+}
 function afterHumanAction(turnEnded){
   render();
   if (G.winner){ finishGame(); return; }
@@ -629,10 +747,25 @@ function afterHumanAction(turnEnded){
 var botPlaysThisTurn = 0;
 function botStep(){
   if (G.winner) return;
-  var moves = legalPlaysFor(G, "bot");
+
+  // stock priority: always play it immediately when legal
+  var stockCard = top(G.players.bot.stock);
+  if (stockCard){
+    var tgt = chooseStockTarget(G, "bot", stockCard);
+    if (tgt){
+      applyPlay(G, "bot", { type: "stock" }, tgt.pileIdx);
+      botPlaysThisTurn++;
+      render();
+      if (G.winner){ finishGame(); return; }
+      botTimer = setTimeout(botStep, 480);
+      return;
+    }
+  }
+
+  var moves = legalPlaysFor(G, "bot").filter(function(m){ return m.src.type !== "stock"; });
   if (moves.length && botPlaysThisTurn < 300){
-    var move = pickBestMove(G, "bot");
-    applyPlay(G, "bot", move.src, move.pileIdx);
+    var best = chooseBestRootMove(G, "bot", moves);
+    applyPlay(G, "bot", best.src, best.pileIdx);
     botPlaysThisTurn++;
     render();
     if (G.winner){ finishGame(); return; }
@@ -644,9 +777,13 @@ function botStep(){
 function botDiscardStep(){
   if (G.winner) return;
   if (!G.players.bot.hand.length){
-    startTurn("human"); render(); return;
+    applyPass(G, "bot");
+    botPlaysThisTurn = 0;
+    if (G.winner){ finishGame(); return; }
+    startTurn("human"); render();
+    return;
   }
-  var choice = pickBestDiscard(G, "bot");
+  var choice = chooseDiscard(G, "bot");
   applyDiscard(G, "bot", choice.handIdx, choice.pileIdx);
   botPlaysThisTurn = 0;
   startTurn("human");
@@ -668,29 +805,19 @@ function cardHTML(card, cls, standsFor){
   cls = cls || "";
   if (!card) return '<div class="card empty"></div>';
   if (card.rank === 0){
-    return '<div class="card wild ' + cls + '">' +
-      (standsFor ? '<span class="wildAs">' + standsFor + '</span>' : '<span class="wildLogo">SKIP<br>BO</span>') +
-      '</div>';
+    return '<div class="card wild ' + cls + '"><span class="rank">' + (standsFor ? RANK_LABEL[standsFor - 1] : "★") + '</span><span class="suit">wild</span></div>';
   }
-  var color = PALETTE[(card.rank - 1) % PALETTE.length];
-  return '<div class="card num ' + cls + '" style="--card-color:' + color + '"><span class="rank">' + card.rank + '</span></div>';
+  var red = isRed(card);
+  return '<div class="card ' + cls + '" style="color:' + (red ? "#B33A34" : "#1A1D24") + '"><span class="rank">' + label(card) + '</span><span class="suit">' + suitGlyph(card) + '</span></div>';
 }
 function backHTML(){ return '<div class="card back"></div>'; }
 
 function sourceIsPlayable(src){
   var card = peekSourceCard(G, "human", src);
   if (!card) return false;
-  if (canStartNewPile(card)) return true;
+  if (canStartNewPile(card, G.build.length)) return true;
   for (var i = 0; i < G.build.length; i++) if (canPlaceOnPile(card, G.build[i])) return true;
   return false;
-}
-function legalTargetsFor(src){
-  var card = peekSourceCard(G, "human", src);
-  var out = { piles: [], newPile: false };
-  if (!card) return out;
-  G.build.forEach(function(p, i){ if (canPlaceOnPile(card, p)) out.piles.push(i); });
-  out.newPile = canStartNewPile(card);
-  return out;
 }
 
 function renderStatusBar(){
@@ -705,7 +832,7 @@ function renderStatusBar(){
   '<div class="statusbar">' +
     '<span class="' + pillClass + '">' + pillText + '</span>' +
     '<span class="census' + (cs.ok ? '' : ' bad') + '"><span class="dot"></span>' +
-      (cs.ok ? (cs.total + '/162 cards accounted for') : ('deck check: ' + cs.total + '/162' + (cs.dupes.length ? ' · ' + cs.dupes.join(' ') : ''))) +
+      (cs.ok ? (cs.total + '/108 cards accounted for') : ('deck check: ' + cs.total + '/108' + (cs.dupes.length ? ' · ' + cs.dupes.join(' ') : ''))) +
     '</span>' +
   '</div>';
 }
@@ -732,13 +859,16 @@ function renderBotZone(){
 function renderCenter(){
   var piles = G.build.map(function(pile, i){
     var legal = selected && canPlaceOnPile(peekSourceCard(G, "human", selected), pile) && isMyTurnPlayable();
+    var pv = pileValue(pile);
     return '<div class="pile-slot' + (legal ? ' legal-target' : '') + '"><button data-target="pile:' + i + '">' +
-      cardHTML(top(pile.cards), "", pileValue(pile)) +
-      '</button><span class="pile-meta">next ' + (pileValue(pile) + 1 > 12 ? '—' : pileValue(pile) + 1) + '</span></div>';
+      cardHTML(top(pile.cards), "", pv) +
+      '</button><span class="pile-meta">next ' + (pv + 1 > PILE_TOP ? '—' : RANK_LABEL[pv]) + '</span></div>';
   }).join("");
-  var newLegal = selected && canStartNewPile(peekSourceCard(G, "human", selected)) && isMyTurnPlayable();
-  var newTile = '<div class="pile-slot' + (newLegal ? ' legal-target' : '') + '"><button data-target="pile:new">' +
-    '<div class="card slot">1</div></button><span class="pile-meta">new pile</span></div>';
+  var newLegal = selected && canStartNewPile(peekSourceCard(G, "human", selected), G.build.length) && isMyTurnPlayable();
+  var newTile = G.build.length < MAX_PILES ? (
+    '<div class="pile-slot' + (newLegal ? ' legal-target' : '') + '"><button data-target="pile:new">' +
+    '<div class="card slot">A</div></button><span class="pile-meta">new pile</span></div>'
+  ) : "";
   return '' +
   '<div class="center">' +
     '<div class="center-side">' +
@@ -775,6 +905,8 @@ function renderYouZone(){
     return '<button class="cardbtn' + (sel ? ' selected' : '') + (playable ? ' playable' : '') + '" data-src="hand:' + i + '">' + cardHTML(c) + '</button>';
   }).join("");
 
+  var passBtn = (isMyTurnPlayable() && !p.hand.length) ? '<button class="btn" data-action="pass">Pass turn</button>' : '';
+
   return '' +
   '<div class="zone">' +
     '<div class="zone-label"><span>You</span><span>' + p.stock.length + ' left in stock</span></div>' +
@@ -782,7 +914,7 @@ function renderYouZone(){
       '<div class="stack-wrap"><span class="stack-label">Your stock</span><div class="stack-body">' + stockHTML + '<span class="count-badge big">' + p.stock.length + '</span></div></div>' +
       '<div class="discard-row">' + discs + '</div>' +
     '</div>' +
-    '<div class="handwrap">' + (hand || '<div class="hand-empty-note">Hand empty.</div>') + '</div>' +
+    '<div class="handwrap">' + (hand || ('<div class="hand-empty-note">Hand empty' + (passBtn ? ' — nothing left to draw.' : '') + '</div>' + passBtn)) + '</div>' +
   '</div>';
 }
 
@@ -798,20 +930,21 @@ function hintText(){
 
 function renderLogEntry(entry){
   var who = function(w){ return w === "human" ? "You" : "The computer"; };
+  var cardTxt = function(entry){ return entry.rank === 0 ? "a joker" : ("a " + RANK_LABEL[entry.rank - 1]); };
   switch (entry.kind){
-    case "deal": return { cls: "sys", text: "New game dealt — 30-card stock and 5-card hand each. 162 cards in play." };
+    case "deal": return { cls: "sys", text: "New game dealt — 15-card stock and 5-card hand each. 108 cards in play." };
     case "play": {
       var name = who(entry.who);
       var src = entry.from === "stock" ? " from the stock" : entry.from === "discard" ? " from a discard pile" : "";
       var openTxt = entry.opened ? ", opening a new pile" : "";
       var doneTxt = entry.completed ? " — pile complete!" : "";
-      var cardTxt = entry.rank === 0 ? "a Skip-Bo (as " + entry.standsFor + ")" : ("a " + entry.rank);
-      return { cls: entry.from === "stock" ? "stock" : (entry.who === "human" ? "you" : ""), text: name + " played " + cardTxt + src + openTxt + doneTxt + "." };
+      return { cls: entry.from === "stock" ? "stock" : (entry.who === "human" ? "you" : ""), text: name + " played " + cardTxt(entry) + src + openTxt + doneTxt + "." };
     }
     case "hand-refill": return { cls: "sys", text: who(entry.who) + "'s hand emptied mid-turn — drew " + entry.n + " more and kept going." };
-    case "discard": return { cls: "sys", text: who(entry.who) + " discarded a " + (entry.rank === 0 ? "Skip-Bo" : entry.rank) + " to pile D" + (entry.pileIdx + 1) + ". Turn over." };
-    case "reshuffle": return { cls: "sys", text: "Draw pile empty — " + entry.n + " cards from completed piles reshuffled back in." };
-    case "strip": return { cls: "sys", text: "Draw pile and completed-pile pool both empty — " + entry.n + " cards pulled from beneath the build piles and reshuffled (every pile keeps its progress)." };
+    case "discard": return { cls: "sys", text: who(entry.who) + " discarded " + cardTxt(entry) + " to pile D" + (entry.pileIdx + 1) + ". Turn over." };
+    case "pass": return { cls: "sys", text: who(entry.who) + " had nothing to play or discard and passed." };
+    case "reshuffle": return { cls: "sys", text: "Draw pile empty — " + entry.n + " cards from completed King piles reshuffled back in." };
+    case "strip": return { cls: "sys", text: "Draw pile and completed-pile pool both empty — " + entry.n + " cards pulled from beneath the build piles and reshuffled (every pile keeps its progress; discard piles were never touched)." };
     case "gridlock": return { cls: "sys", text: "Nothing left anywhere to draw." };
     case "stalemate": return { cls: "sys", text: "No cards left to draw and no legal moves for either side. Game called as a stalemate to keep things resolvable." };
     case "win": return { cls: "win", text: who(entry.who) + " emptied their stock pile and wins the game!" };
@@ -826,24 +959,22 @@ function renderLog(){
   return '<div class="logbox" id="logbox">' + lines + '</div>';
 }
 function renderScore(){
-  var totalDecided = board.humanWins + board.botWins;
-  var winRate = totalDecided ? Math.round(board.humanWins / totalDecided * 100) : 0;
   var hist = board.history.slice(0, 12).map(function(h){
     var whoCls = h.winner === "human" ? "you" : (h.winner === "bot" ? "bot" : "draw");
     var whoText = h.winner === "human" ? "You" : (h.winner === "bot" ? "Computer" : "Draw");
-    var margin = (h.winner !== "draw" && typeof h.loserStockLeft === "number") ? (" · opponent had " + h.loserStockLeft + " left in stock") : "";
+    var margin = (h.winner !== "draw" && typeof h.pts === "number") ? (" · +" + h.pts + " pts · opponent had " + h.loserStockLeft + " left in stock") : "";
     var d = new Date(h.at);
     return '<div class="hist-line"><span class="who ' + whoCls + '">' + whoText + '</span><span>' + d.toLocaleDateString() + margin + '</span></div>';
   }).join("");
   return '' +
   '<div class="score">' +
     '<div class="score-grid">' +
-      '<div class="score-cell' + (board.humanWins >= board.botWins ? ' lead' : '') + '"><div class="nm">You</div><div class="wl">' + board.humanWins + '</div><div class="sub">win' + (board.humanWins === 1 ? '' : 's') + '</div></div>' +
-      '<div class="score-cell' + (board.botWins > board.humanWins ? ' lead' : '') + '"><div class="nm">Computer</div><div class="wl">' + board.botWins + '</div><div class="sub">win' + (board.botWins === 1 ? '' : 's') + '</div></div>' +
+      '<div class="score-cell' + (board.humanPts >= board.botPts ? ' lead' : '') + '"><div class="nm">You</div><div class="wl">' + board.humanPts + '</div><div class="sub">' + board.humanWins + ' win' + (board.humanWins === 1 ? '' : 's') + '</div></div>' +
+      '<div class="score-cell' + (board.botPts > board.humanPts ? ' lead' : '') + '"><div class="nm">Computer</div><div class="wl">' + board.botPts + '</div><div class="sub">' + board.botWins + ' win' + (board.botWins === 1 ? '' : 's') + '</div></div>' +
     '</div>' +
-    '<div class="streakline"><span><b>' + board.games + '</b> games played</span><span><b>' + winRate + '%</b> your win rate</span><span><b>' + board.bestStreak + '</b> best streak</span></div>' +
-    (board.streak > 1 ? '<div class="score-note">Current streak: <b style="color:var(--ink)">' + board.streak + '</b> for ' + (board.streakWho === 'human' ? 'you' : 'the computer') + '.</div>' : '') +
-    '<div class="score-note">Recorded automatically the instant a game ends. Stored only in this browser.</div>' +
+    '<div class="streakline"><span><b>' + board.games + '</b> games played</span>' + (board.draws ? ('<span><b>' + board.draws + '</b> stalemates</span>') : '') + '<span><b>' + board.bestStreak + '</b> best streak</span></div>' +
+    (board.streak > 1 ? '<div class="score-note">Current streak: <b style="color:var(--bone)">' + board.streak + '</b> for ' + (board.streakWho === 'human' ? 'you' : 'the computer') + '.</div>' : '') +
+    '<div class="score-note">Winner scores what’s left in the loser’s stock: wilds 20, face cards 10, aces 1, else face value. Recorded automatically the instant a game ends — stored only in this browser.</div>' +
     (board.history.length ? '<div class="score-hist">' + hist + '</div>' : '<div class="score-note">No games recorded yet — finish one to start the board.</div>') +
   '</div>';
 }
@@ -856,8 +987,9 @@ function renderOverlay(){
   if (G.winner === "draw") sub = "No cards left to draw anywhere and neither side could move.";
   else {
     var loser = otherOf(G.winner);
+    var pts = G.players[loser].stock.reduce(function(s, c){ return s + cardValue(c); }, 0);
     sub = (G.winner === "human" ? "You" : "The computer") + " emptied the stock pile first. " +
-      (G.winner === "human" ? "The computer" : "You") + " had " + G.players[loser].stock.length + " card" + (G.players[loser].stock.length === 1 ? "" : "s") + " left in stock.";
+      (G.winner === "human" ? "The computer" : "You") + " had " + G.players[loser].stock.length + " card" + (G.players[loser].stock.length === 1 ? "" : "s") + " left in stock, worth " + pts + " points.";
   }
   return '' +
   '<div class="overlay"><div class="overlay-card">' +
@@ -871,7 +1003,7 @@ function render(){
   var undoDisabled = !(G.turn === "human" && !G.winner && G.turnHistory.length);
   app.innerHTML = '' +
     '<div class="hdr">' +
-      '<div class="brand"><div class="eyebrow">Solo &middot; vs. computer</div><h1>Skip<span class="sb">-Bo</span></h1></div>' +
+      '<div class="brand"><div class="eyebrow">Two decks · jokers wild · ace through king · solo</div><h1>Spite &amp; Malice</h1></div>' +
       '<div class="hdr-actions">' +
         '<button class="btn undo" id="undoBtn" data-action="undo"' + (undoDisabled ? ' disabled' : '') + '>&#8630; Undo</button>' +
         '<button class="btn small" data-action="new-game">New game</button>' +
@@ -889,11 +1021,13 @@ function render(){
       '</div>' +
       (activeTab === "log" ? renderLog() : renderScore()) +
     '</div>' +
-    '<details class="rules"><summary>How Skip-Bo works (quick reference)</summary><div class="body">' +
-      'Empty your <b>30-card stock pile</b> before the computer empties its own — that\'s the whole game. ' +
-      'Each turn you draw back up to <b>5 cards</b> in hand, then play as many cards as you can from your stock, your hand, or the top of your own 4 discard piles onto any shared center pile — each center pile must be built strictly <b>1 through 12</b>, and Skip-Bo cards are wild. Play as many cards as the sequence allows, switching between sources freely. When you can\'t or don\'t want to play more, discard exactly <b>one</b> card from your hand onto one of your own 4 discard piles to end your turn.' +
+    '<details class="rules"><summary>House rules (quick reference)</summary><div class="body">' +
+      'Two standard decks plus four jokers (108 cards). Each player has a <b>15-card stock pile</b> — empty yours first and you win. ' +
+      'Draw back up to <b>5 cards</b> in hand at the start of your turn, then play as many cards as you can from your stock, your hand, or the top of your own 4 discard piles onto any shared center pile — each one builds strictly <b>Ace through King</b>, and jokers are wild (kings are ordinary cards). A pile finished with a King clears into the reshuffle pool. ' +
+      'When you can’t or don’t want to play more, discard exactly <b>one</b> card from your hand onto one of your own 4 discard piles to end your turn — your discard piles are never reshuffled. ' +
+      'When the game ends, the winner scores whatever is left in the loser’s stock: wilds worth 20, face cards 10, aces 1, everything else its number.' +
     '</div></details>' +
-    '<div class="footer-note">Computer opponent runs a local, rule-based move-scoring engine with a short lookahead — no server, no account, no network calls. Everything, including the scoreboard, is stored only in this browser.</div>' +
+    '<div class="footer-note">Computer opponent runs a local full-turn rollout search with a hand-tuned evaluator — no server, no account, no network calls. Everything, including the scoreboard, is stored only in this browser.</div>' +
     renderOverlay();
 
   var logbox = document.getElementById("logbox");
@@ -909,6 +1043,7 @@ app.addEventListener("click", function(e){
   if (actionEl){
     var action = actionEl.getAttribute("data-action");
     if (action === "undo"){ doUndo(); return; }
+    if (action === "pass"){ passTurnHuman(); return; }
     if (action === "new-game"){
       if (!G.winner && !window.confirm("Start a new game? Your current game in progress will be lost.")) return;
       clearTimeout(botTimer);
@@ -918,7 +1053,6 @@ app.addEventListener("click", function(e){
     if (action === "tab:log"){ activeTab = "log"; render(); return; }
     if (action === "tab:score"){ activeTab = "score"; render(); return; }
   }
-  // target clicks take priority when both src+target sit on the same discard button
   if (targetEl){
     var t = targetEl.getAttribute("data-target");
     if (t.indexOf("pile:") === 0){
