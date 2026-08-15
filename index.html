@@ -165,12 +165,12 @@ details.rules .body b{color:var(--bone);}
 
 .footer-note{text-align:center;font-size:10.5px;color:var(--faint);padding:10px 4px 0;line-height:1.6;}
 
-.fan-label{background:none;border:none;padding:0;display:inline-flex;align-items:center;gap:0;text-decoration:underline dotted;text-underline-offset:2px;}
-.fan-label:hover{color:var(--bone);}
-.peek-card{max-width:320px;}
-.peek-stack{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;padding:4px 2px;margin-bottom:6px;}
-.peek-row{display:flex;align-items:center;gap:10px;justify-content:center;}
-.peek-tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass);font-weight:700;}
+.discard-stack{display:flex;flex-direction:column;align-items:center;}
+.discard-stack .stack-card{margin-top:-40px;}
+.discard-stack .stack-card:first-child{margin-top:0;}
+.card.corner{align-items:flex-start;justify-content:flex-start;padding:4px 0 0 5px;gap:0;}
+.card.corner .rank{font-size:12px;}
+.card.corner .suit{font-size:9px;}
 
 @media (max-width:380px){
   .score-grid{grid-template-columns:1fr;}
@@ -670,7 +670,6 @@ var board = loadBoard();
 var selected = null;
 var activeTab = "log";
 var botTimer = null;
-var peek = null; // { who: "human"|"bot", idx: 0-3 } — viewing a discard pile's full stack
 
 function startTurn(who){
   G.turn = who;
@@ -853,8 +852,13 @@ function renderStatusBar(){
 function renderBotZone(){
   var b = G.players.bot;
   var discs = b.discards.map(function(pile, i){
-    return '<div class="fan"><button class="fan-label" data-action="peek:bot:' + i + '">D' + (i + 1) + (pile.length ? '<span class="fan-count">' + pile.length + '</span>' : '') + '</button>' +
-      (pile.length ? cardHTML(top(pile)) : '<div class="card empty"></div>') + '</div>';
+    var stack = pile.length ?
+      pile.map(function(c, idx){
+        var isTop = idx === pile.length - 1;
+        return '<div class="stack-card">' + cardHTML(c, isTop ? "" : "corner") + '</div>';
+      }).join("") :
+      '<div class="stack-card"><div class="card empty"></div></div>';
+    return '<div class="fan"><span class="fan-label">D' + (i + 1) + '</span><div class="discard-stack">' + stack + '</div></div>';
   }).join("");
   return '' +
   '<div class="zone">' +
@@ -907,9 +911,12 @@ function renderYouZone(){
     var playable = isMyTurnPlayable() && pile.length && sourceIsPlayable({ type: "discard", idx: i });
     var isDiscardTarget = selected && selected.type === "hand" && isMyTurnPlayable();
     var cls = "cardbtn" + (sel ? " selected" : "") + (playable ? " playable" : "") + (isDiscardTarget ? " legal-target" : "");
-    return '<div class="fan"><button class="fan-label" data-action="peek:human:' + i + '">D' + (i + 1) + (pile.length ? '<span class="fan-count">' + pile.length + '</span>' : '') + '</button>' +
-      '<button class="' + cls + '" data-src="discard:' + i + '" data-target="discard:' + i + '">' +
+    var under = pile.slice(0, -1).map(function(c){
+      return '<div class="stack-card">' + cardHTML(c, "corner") + '</div>';
+    }).join("");
+    var topHTML = '<div class="stack-card"><button class="' + cls + '" data-src="discard:' + i + '" data-target="discard:' + i + '">' +
       (pile.length ? cardHTML(top(pile)) : '<div class="card empty"></div>') + '</button></div>';
+    return '<div class="fan"><span class="fan-label">D' + (i + 1) + '</span><div class="discard-stack">' + under + topHTML + '</div></div>';
   }).join("");
 
   var hand = p.hand.map(function(c, i){
@@ -993,27 +1000,6 @@ function renderScore(){
   '</div>';
 }
 
-function renderPeekOverlay(){
-  if (!peek) return "";
-  var pile = G.players[peek.who].discards[peek.idx];
-  var whoLabel = peek.who === "human" ? "Your" : "Computer's";
-  var cardsHTML = pile.length ?
-    '<div class="peek-stack">' + pile.slice().reverse().map(function(c, i){
-      var isTop = i === 0;
-      return '<div class="peek-row">' + cardHTML(c) + (isTop ? '<span class="peek-tag">top — in play</span>' : '') + '</div>';
-    }).join("") + '</div>' :
-    '<p class="score-note">This pile is empty.</p>';
-  return '' +
-  '<div class="overlay">' +
-    '<div class="overlay-card peek-card">' +
-      '<h2>' + whoLabel + ' discard pile D' + (peek.idx + 1) + '</h2>' +
-      '<p>Listed top to bottom' + (pile.length ? ' — ' + pile.length + ' card' + (pile.length === 1 ? '' : 's') + '. Only the top card is currently playable.' : '') + '</p>' +
-      cardsHTML +
-      '<div class="btnrow"><button class="btn primary" data-action="peek-close">Close</button></div>' +
-    '</div>' +
-  '</div>';
-}
-
 function renderOverlay(){
   if (!G.winner) return "";
   var cls = G.winner === "human" ? "win" : (G.winner === "bot" ? "lose" : "draw");
@@ -1063,8 +1049,7 @@ function render(){
       'When the game ends, the winner scores whatever is left in the loser’s stock: wilds worth 20, face cards 10, aces 1, everything else its number.' +
     '</div></details>' +
     '<div class="footer-note">Computer opponent runs a local full-turn rollout search with a hand-tuned evaluator — no server, no account, no network calls. Everything, including the scoreboard, is stored only in this browser.</div>' +
-    renderOverlay() +
-    renderPeekOverlay();
+    renderOverlay();
 
   var logbox = document.getElementById("logbox");
   if (logbox) logbox.scrollTop = logbox.scrollHeight;
@@ -1088,13 +1073,6 @@ app.addEventListener("click", function(e){
     }
     if (action === "tab:log"){ activeTab = "log"; render(); return; }
     if (action === "tab:score"){ activeTab = "score"; render(); return; }
-    if (action === "peek-close"){ peek = null; render(); return; }
-    if (action.indexOf("peek:") === 0){
-      var pp = action.slice(5).split(":");
-      peek = { who: pp[0], idx: parseInt(pp[1], 10) };
-      render();
-      return;
-    }
     if (action === "reset-board"){
       if (window.confirm("Reset the scoreboard? This clears all wins, points, and history in this browser. This cannot be undone.")) resetBoard();
       return;
